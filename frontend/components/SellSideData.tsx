@@ -148,27 +148,6 @@ const StockGuideTable: React.FC<{ data: StockGuideData[] }> = ({ data }) => {
     );
 };
 
-const StockGuideTableSkeleton: React.FC = () => {
-    const columns = 23; // acompanha o número de colunas da tabela real
-    return (
-        <div className="overflow-x-auto animate-pulse">
-            <table className="w-full text-xs">
-                <tbody>
-                    {Array.from({ length: 5 }).map((_, i) => (
-                        <tr key={i} className="border-b border-slate-700">
-                            {Array.from({ length: columns }).map((__, j) => (
-                                <td key={j} className="p-2">
-                                    <div className="h-4 bg-slate-700/50 rounded"></div>
-                                </td>
-                            ))}
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
-    );
-};
-
 
 const SellSideData: React.FC = () => {
     const [view, setView] = useState<'guide' | 'table'>('guide');
@@ -253,7 +232,7 @@ const SellSideData: React.FC = () => {
                     {error ? (
                         <div className="text-red-500">{error}</div>
                     ) : loading ? (
-                        <StockGuideTableSkeleton />
+
                     ) : (
                         <StockGuideTable data={filteredData} />
                     )}

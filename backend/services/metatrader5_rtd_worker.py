@@ -43,10 +43,22 @@ class MetaTrader5RTDWorker:
         self.realtime_symbols: Set[str] = set()  # Símbolos com ticks em tempo real
         self.failed_symbols: Set[str] = set()    # Símbolos que falharam na ativação
 
+        # Carrega variáveis do arquivo .env
+        load_dotenv()
+
         # Configurações do MetaTrader5
-        self.MT5_LOGIN = int(os.getenv("MT5_LOGIN", "5223688"))
-        self.MT5_PASSWORD = os.getenv("MT5_PASSWORD", "Pandora337303$")
-        self.MT5_SERVER = os.getenv("MT5_SERVER", "BancoBTGPactual-PRD")
+        self.MT5_LOGIN = os.getenv("MT5_LOGIN")
+        if not self.MT5_LOGIN:
+            raise ValueError("Variável de ambiente MT5_LOGIN não definida")
+        self.MT5_LOGIN = int(self.MT5_LOGIN)
+
+        self.MT5_PASSWORD = os.getenv("MT5_PASSWORD")
+        if not self.MT5_PASSWORD:
+            raise ValueError("Variável de ambiente MT5_PASSWORD não definida")
+
+        self.MT5_SERVER = os.getenv("MT5_SERVER")
+        if not self.MT5_SERVER:
+            raise ValueError("Variável de ambiente MT5_SERVER não definida")
         
         # Configurações de timing
         self.PAUSE_INTERVAL_SECONDS = 2  # Mais rápido para tempo real
