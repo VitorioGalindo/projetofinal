@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EditableAsset, DailyMetric } from '../types';
 import { ChevronUpIcon, PencilSquareIcon, TrashIcon, PlusIcon } from '../constants';
 
 interface PortfolioManagerProps {
-    initialAssets: EditableAsset[];
+    initialAssets?: EditableAsset[];
 }
 
 const initialMetrics: DailyMetric[] = [
@@ -14,10 +14,14 @@ const initialMetrics: DailyMetric[] = [
     { id: 'outrasDespesas', label: 'Outras Despesas', value: 0.00 },
 ];
 
-const PortfolioManager: React.FC<PortfolioManagerProps> = ({ initialAssets }) => {
+const PortfolioManager: React.FC<PortfolioManagerProps> = ({ initialAssets = [] }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [assets, setAssets] = useState<EditableAsset[]>(initialAssets);
     const [metrics, setMetrics] = useState<DailyMetric[]>(initialMetrics);
+
+    useEffect(() => {
+        setAssets(initialAssets);
+    }, [initialAssets]);
 
     const handleAssetChange = (id: number, field: keyof EditableAsset, value: string | number) => {
         setAssets(assets.map(asset => asset.id === id ? { ...asset, [field]: value } : asset));

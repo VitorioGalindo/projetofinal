@@ -32,13 +32,32 @@ export interface Asset {
 }
 
 export interface PortfolioSummary {
-  netLiquidity: number;
-  quoteValue: number;
-  dailyChange: number;
-  buyPosition: number;
-  sellPosition: number;
-  netLong: number;
-  exposure: number;
+  id: number;
+  name: string;
+  total_value: number;
+  total_cost: number;
+  total_gain: number;
+  total_gain_percent: number;
+  holdings: PortfolioHolding[];
+}
+
+export interface PortfolioDailyValue {
+  date: string;
+  total_value: number;
+  total_cost: number;
+  total_gain: number;
+  total_gain_percent: number;
+}
+
+export interface PortfolioHolding {
+  symbol: string;
+  quantity: number;
+  avg_price: number;
+  current_price: number;
+  value: number;
+  cost: number;
+  gain: number;
+  gain_percent: number;
 }
 
 export interface ChatMessage {
