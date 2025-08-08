@@ -134,5 +134,65 @@ class AssetMetrics(db.Model):
     open_price = db.Column(Numeric(10, 2))
     high_price = db.Column(Numeric(10, 2))
     low_price = db.Column(Numeric(10, 2))
-    
+
     updated_at = db.Column(DateTime(timezone=True), onupdate=func.now())
+
+    ticker_info = relationship("Ticker", back_populates="metrics")
+
+
+class Portfolio(db.Model):
+    __tablename__ = 'portfolios'
+
+    id = db.Column(Integer, primary_key=True)
+    name = db.Column(String(100), nullable=False)
+
+    positions = relationship(
+        "PortfolioPosition",
+        back_populates="portfolio",
+        cascade="all, delete-orphan",
+    )
+
+    daily_values = relationship(
+        "PortfolioDailyValue",
+        back_populates="portfolio",
+        cascade="all, delete-orphan",
+    )
+
+
+class PortfolioPosition(db.Model):
+    __tablename__ = 'portfolio_positions'
+
+    id = db.Column(Integer, primary_key=True)
+    portfolio_id = db.Column(Integer, ForeignKey('portfolios.id'), nullable=False, index=True)
+    symbol = db.Column(String(20), ForeignKey('tickers.symbol'), nullable=False)
+    quantity = db.Column(Numeric(20, 4), nullable=False)
+    avg_price = db.Column(Numeric(10, 2), nullable=False)
+
+    portfolio = relationship("Portfolio", back_populates="positions")
+    ticker = relationship("Ticker", foreign_keys=[symbol], primaryjoin="PortfolioPosition.symbol == Ticker.symbol")
+    metrics = relationship(
+        "AssetMetrics",
+        foreign_keys=[symbol],
+        primaryjoin="PortfolioPosition.symbol == AssetMetrics.symbol",
+        viewonly=True,
+        uselist=False,
+    )
+
+
+class PortfolioDailyValue(db.Model):
+    __tablename__ = 'portfolio_daily_values'
+
+    id = db.Column(Integer, primary_key=True)
+    portfolio_id = db.Column(Integer, ForeignKey('portfolios.id'), nullable=False, index=True)
+    date = db.Column(Date, nullable=False, server_default=func.current_date())
+    total_value = db.Column(Numeric(20, 2), nullable=False)
+    total_cost = db.Column(Numeric(20, 2), nullable=False)
+    total_gain = db.Column(Numeric(20, 2), nullable=False)
+    total_gain_percent = db.Column(Numeric(10, 4), nullable=False)
+    created_at = db.Column(DateTime(timezone=True), server_default=func.now())
+
+    portfolio = relationship("Portfolio", back_populates="daily_values")
+
+    __table_args__ = (
+        db.UniqueConstraint('portfolio_id', 'date', name='uix_portfolio_date'),
+    )
