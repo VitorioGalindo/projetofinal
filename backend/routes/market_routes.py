@@ -1,9 +1,47 @@
 from flask import Blueprint, jsonify
 from backend.services.metatrader5_rtd_worker import get_rtd_worker
+from backend.models import AssetMetrics
+from backend import db
 import logging
 
 logger = logging.getLogger(__name__)
 market_bp = Blueprint('market_bp', __name__)
+
+
+@market_bp.route('/overview', methods=['GET'])
+def get_market_overview():
+    """Retorna um resumo simples do mercado baseado no banco de dados."""
+    try:
+        overview = {}
+
+        index_map = {"IBOV": "ibovespa", "IFIX": "ifix", "USDBRL": "dolar"}
+        for symbol, key in index_map.items():
+            metric = db.session.get(AssetMetrics, symbol)
+            if metric:
+                overview[key] = {
+                    "price": float(metric.last_price) if metric.last_price is not None else None,
+                    "change_percent": float(metric.price_change_percent) if metric.price_change_percent is not None else None,
+                }
+
+        gainers = (
+            db.session.query(AssetMetrics.symbol)
+            .order_by(AssetMetrics.price_change_percent.desc())
+            .limit(3)
+            .all()
+        )
+        losers = (
+            db.session.query(AssetMetrics.symbol)
+            .order_by(AssetMetrics.price_change_percent.asc())
+            .limit(3)
+            .all()
+        )
+        overview["top_gainers"] = [g[0] for g in gainers]
+        overview["top_losers"] = [l[0] for l in losers]
+
+        return jsonify({"success": True, "data": overview})
+    except Exception as e:
+        logger.error(f"Erro em get_market_overview: {e}")
+        return jsonify({"success": False, "error": "Erro ao obter overview do mercado"}), 500
 
 @market_bp.route('/status', methods=['GET'])
 def get_market_status():
@@ -13,6 +51,7 @@ def get_market_status():
         return jsonify({"status": "inactive", "message": "RTD Worker não inicializado."}), 503
     return jsonify(rtd_worker.get_subscription_stats()), 200
 
+@market_bp.route('/quotes/<string:ticker>', methods=['GET'])
 @market_bp.route('/quote/<string:ticker>', methods=['GET'])
 def get_quote(ticker):
     """Retorna a cotação em tempo real para um ticker específico."""
@@ -24,6 +63,6 @@ def get_quote(ticker):
     quote = rtd_worker.get_mt5_quote(ticker_upper)
 
     if quote:
-        return jsonify(quote)
+        return jsonify({"success": True, "ticker": ticker_upper, "quote": quote})
     else:
-        return jsonify({"error": f"Não foi possível obter a cotação para '{ticker_upper}'."}), 404
+        return jsonify({"success": False, "error": f"Não foi possível obter a cotação para '{ticker_upper}'."}), 404

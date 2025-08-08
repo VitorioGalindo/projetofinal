@@ -5,6 +5,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 documents_bp = Blueprint('documents_bp', __name__)
+cvm_bp = Blueprint('cvm_bp', __name__)
 
 @documents_bp.route('/by_company/<int:company_id>', methods=['GET'])
 def get_documents_by_company_id(company_id):
@@ -34,3 +35,63 @@ def get_documents_by_company_id(company_id):
     except Exception as e:
         logger.error(f"Erro em get_documents_by_company_id: {e}")
         return jsonify({"success": False, "error": "Erro interno ao buscar documentos"}), 500
+
+
+@cvm_bp.route('/documents', methods=['GET'])
+def list_cvm_documents():
+    """Retorna uma lista simplificada de documentos da CVM."""
+    doc_type = request.args.get('document_type')
+    limit = request.args.get('limit', 100, type=int)
+
+    try:
+        query = db.session.query(CvmDocument, Company.company_name).join(Company)
+        if doc_type:
+            query = query.filter(CvmDocument.document_type == doc_type)
+        docs = query.order_by(CvmDocument.delivery_date.desc()).limit(limit).all()
+
+        documents = [
+            {
+                "id": doc.id,
+                "company": company_name,
+                "document_type": doc.document_type,
+                "title": doc.title,
+                "delivery_date": doc.delivery_date.isoformat() if doc.delivery_date else None,
+            }
+            for doc, company_name in docs
+        ]
+        return jsonify({"success": True, "documents": documents})
+    except Exception as e:
+        logger.error(f"Erro em list_cvm_documents: {e}")
+        return jsonify({"success": False, "error": "Erro ao listar documentos"}), 500
+
+
+@cvm_bp.route('/document-types', methods=['GET'])
+def list_document_types():
+    """Retorna tipos de documentos disponíveis."""
+    try:
+        types = [r[0] for r in db.session.query(CvmDocument.document_type).distinct().order_by(CvmDocument.document_type)]
+        return jsonify({"success": True, "types": types})
+    except Exception as e:
+        logger.error(f"Erro em list_document_types: {e}")
+        return jsonify({"success": False, "error": "Erro ao listar tipos"}), 500
+
+
+@cvm_bp.route('/companies', methods=['GET'])
+def list_cvm_companies():
+    """Retorna uma lista de empresas cadastradas na CVM."""
+    try:
+        limit = request.args.get('limit', 100, type=int)
+        companies = (
+            db.session.query(Company.cvm_code, Company.company_name)
+            .order_by(Company.company_name)
+            .limit(limit)
+            .all()
+        )
+        company_list = [
+            {"cvm_code": c.cvm_code, "name": c.company_name}
+            for c in companies if c.cvm_code is not None
+        ]
+        return jsonify({"success": True, "companies": company_list})
+    except Exception as e:
+        logger.error(f"Erro em list_cvm_companies: {e}")
+        return jsonify({"success": False, "error": "Erro ao listar empresas"}), 500

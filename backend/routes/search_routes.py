@@ -14,15 +14,18 @@ def global_search():
 
     try:
         search_term = f"%{query.upper()}%"
-        # Busca por ticker e nome da empresa
-        results = db.session.query(Ticker.ticker, Company.name).join(Company).filter(
+        # Busca por ticker e nome da empresa usando os nomes corretos das colunas
+        results = db.session.query(Ticker.symbol, Company.company_name).join(Company).filter(
             or_(
-                Ticker.ticker.ilike(search_term),
-                Company.name.ilike(search_term)
+                Ticker.symbol.ilike(search_term),
+                Company.company_name.ilike(search_term)
             )
         ).limit(10).all()
-        
-        formatted_results = [{"type": "ticker", "value": r.ticker, "label": f"{r.ticker} - {r.name}"} for r in results]
+
+        formatted_results = [
+            {"type": "ticker", "value": r[0], "label": f"{r[0]} - {r[1]}"}
+            for r in results
+        ]
         
         return jsonify({"results": formatted_results})
     except Exception as e:

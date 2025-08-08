@@ -1,6 +1,6 @@
 # backend/routes/companies_routes.py
 from flask import Blueprint, jsonify, request
-from backend.models import Company, Ticker
+from backend.models import Company, Ticker, CvmDocument
 from backend import db
 import logging
 
@@ -52,3 +52,39 @@ def get_company_details(company_id):
     except Exception as e:
         logger.error(f"Erro ao buscar detalhes da empresa {company_id}: {e}")
         return jsonify({'status': 'error', 'message': 'Erro ao buscar detalhes da empresa.'}), 500
+
+
+@companies_bp.route('/<path:cnpj>/documents', methods=['GET'])
+def get_company_documents_by_cnpj(cnpj):
+    """Retorna documentos da CVM para um CNPJ específico."""
+
+    # Remove caracteres não numéricos do CNPJ para padronizar a consulta
+    cnpj_digits = ''.join(filter(str.isdigit, cnpj))
+    limit = request.args.get('limit', 25, type=int)
+
+    try:
+        company = db.session.query(Company).filter(Company.cnpj == cnpj_digits).first()
+        if not company:
+            return jsonify({"success": False, "message": f"Empresa com CNPJ {cnpj} não encontrada"}), 404
+
+        docs_query = (
+            db.session.query(CvmDocument)
+            .filter(CvmDocument.company_id == company.id)
+            .order_by(CvmDocument.delivery_date.desc())
+            .limit(limit)
+        )
+        documents = [
+            {
+                "id": d.id,
+                "document_type": d.document_type,
+                "title": d.title,
+                "delivery_date": d.delivery_date.isoformat() if d.delivery_date else None,
+                "download_url": d.download_url,
+            }
+            for d in docs_query
+        ]
+
+        return jsonify({"success": True, "cnpj": cnpj, "company_name": company.company_name, "documents": documents})
+    except Exception as e:
+        logger.error(f"Erro em get_company_documents_by_cnpj: {e}")
+        return jsonify({"success": False, "error": "Erro interno ao buscar documentos"}), 500

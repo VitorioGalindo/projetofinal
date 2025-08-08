@@ -15,6 +15,25 @@ def get_realtime_status_http():
     stats = worker.get_subscription_stats()
     return jsonify({'status': 'success', 'data': stats})
 
+
+@realtime_bp.route('/quotes', methods=['GET'])
+def get_realtime_quotes_http():
+    """Retorna cotações em tempo real para uma lista de tickers."""
+    worker = get_rtd_worker()
+    if not worker or not worker.mt5_connected:
+        return jsonify({'status': 'error', 'message': 'Worker não inicializado'}), 503
+
+    tickers = request.args.getlist('tickers')
+    if not tickers:
+        return jsonify({'status': 'error', 'message': 'Nenhum ticker informado'}), 400
+
+    quotes = {}
+    for t in tickers:
+        quote = worker.get_mt5_quote(t.upper())
+        if quote:
+            quotes[t.upper()] = quote
+    return jsonify({'status': 'success', 'data': quotes})
+
 # --- EVENTOS WEBSOCKET ---
 def register_socketio_events(socketio):
     worker = get_rtd_worker()

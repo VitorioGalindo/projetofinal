@@ -62,10 +62,12 @@ class CvmFinancialData(db.Model):
     company_id = db.Column(Integer, ForeignKey('companies.id'), nullable=False, index=True)
     reference_date = db.Column(Date)
     report_type = db.Column(String(20))
+    report_version = db.Column(String(20))
     cvm_version = db.Column(String(20))
     account_code = db.Column(String(50), nullable=False)
     account_name = db.Column(String(255), nullable=False)
     account_value = db.Column(Numeric(20, 2), nullable=False)
+    currency = db.Column(String(10))
     is_fixed = db.Column(Boolean)
     created_at = db.Column(DateTime(timezone=True), server_default=func.now())
     

@@ -24,7 +24,7 @@ def create_app():
         from .routes.ai_routes import ai_bp
         from .routes.realtime_routes import realtime_bp
         from .routes.financials_routes import financials_bp
-        from .routes.documents_routes import documents_bp
+        from .routes.documents_routes import documents_bp, cvm_bp
         from .routes.portfolio_routes import portfolio_bp
         from .routes.screening_routes import screening_bp
         from .routes.search_routes import search_bp
@@ -38,6 +38,7 @@ def create_app():
         app.register_blueprint(realtime_bp, url_prefix='/api/realtime')
         app.register_blueprint(financials_bp, url_prefix='/api/financials')
         app.register_blueprint(documents_bp, url_prefix='/api/documents')
+        app.register_blueprint(cvm_bp, url_prefix='/api/cvm')
         app.register_blueprint(portfolio_bp, url_prefix='/api/portfolio')
         app.register_blueprint(screening_bp, url_prefix='/api/screening')
         app.register_blueprint(search_bp, url_prefix='/api/search')
