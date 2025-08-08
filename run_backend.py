@@ -62,9 +62,6 @@ def main():
         
         # Inicializar database
         with app.app_context():
-            db.init_app(app)
-            logger.info("✅ SQLAlchemy inicializado")
-
             # Testar conexão PostgreSQL
             try:
                 db.session.execute(text('SELECT 1'))
