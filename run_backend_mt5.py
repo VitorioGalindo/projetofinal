@@ -28,7 +28,7 @@ def create_app():
     app.config.from_object(Config)
     
     # Inicializa o SQLAlchemy com a aplicação
-    from backend.database import db
+    from backend import db
     db.init_app(app)
     
     # Inicializa o CORS
