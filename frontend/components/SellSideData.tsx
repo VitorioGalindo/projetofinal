@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SectorNode, StockGuideData } from '../types';
-import { sectorTreeData, mockStockGuideData } from '../constants';
+import { sectorTreeData } from '../constants';
+import { getStockGuideData } from '../services/stockGuideService';
 
 const SectorNodeComponent: React.FC<{ node: SectorNode; onSelect: (sector: string) => void; isRoot?: boolean }> = ({ node, onSelect, isRoot = false }) => {
     const hasChildren = node.children && node.children.length > 0;
@@ -151,6 +152,16 @@ const StockGuideTable: React.FC<{ data: StockGuideData[] }> = ({ data }) => {
 const SellSideData: React.FC = () => {
     const [view, setView] = useState<'guide' | 'table'>('guide');
     const [selectedNode, setSelectedNode] = useState<string | null>(null);
+    const [stockGuideData, setStockGuideData] = useState<StockGuideData[]>([]);
+    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
+
+    useEffect(() => {
+        getStockGuideData()
+            .then(setStockGuideData)
+            .catch((e) => setError(e.message))
+            .finally(() => setLoading(false));
+    }, []);
 
     const handleSelectNode = (nodeName: string) => {
         setSelectedNode(nodeName);
@@ -183,8 +194,8 @@ const SellSideData: React.FC = () => {
         return subSectors;
     }
 
-    const filteredData = selectedNode 
-        ? mockStockGuideData.filter(d => getSubSectors(selectedNode).includes(d.sector)) 
+    const filteredData = selectedNode
+        ? stockGuideData.filter(d => getSubSectors(selectedNode).includes(d.sector))
         : [];
 
     const renderGuide = () => (
@@ -218,7 +229,13 @@ const SellSideData: React.FC = () => {
                             &larr; Voltar ao Guia de Setores
                         </button>
                     </div>
-                    <StockGuideTable data={filteredData} />
+                    {error ? (
+                        <div className="text-red-500">{error}</div>
+                    ) : loading ? (
+                        <div className="text-white">Carregando...</div>
+                    ) : (
+                        <StockGuideTable data={filteredData} />
+                    )}
                 </div>
             )}
         </div>
