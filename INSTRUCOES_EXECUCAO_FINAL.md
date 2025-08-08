@@ -127,7 +127,7 @@ echo $DB_HOST
 echo $DB_USER
 
 # Testar conexão manual
-python -c "from backend.database_improved import db_manager; print(db_manager.health_check())"
+python -c "from backend import create_app, db; app = create_app();\nwith app.app_context(): db.session.execute('SELECT 1'); print('conexao ok')"
 ```
 **Solução:** Sistema usa fallback automático para dados mock
 
