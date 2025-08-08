@@ -253,7 +253,7 @@ const SellSideData: React.FC = () => {
                     {error ? (
                         <div className="text-red-500">{error}</div>
                     ) : loading ? (
-                        <StockGuideTableSkeleton />
+
                     ) : (
                         <StockGuideTable data={filteredData} />
                     )}

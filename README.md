@@ -1,14 +1,78 @@
-# Run and deploy your AI Studio app
+# Dashboard Financeiro – Projeto Final
 
-This contains everything you need to run your app locally.
+Este repositório contém o backend em Flask e o frontend em React/TypeScript.
 
-## Run Locally
+## Instalação
 
-**Prerequisites:**  Node.js
+### Backend
+Instale as dependências principais:
+```bash
+pip install -r requirements.txt
+```
 
+Dependências opcionais:
 
-1. Instale as dependências (este comando na raiz instala também o conteúdo de `frontend`):
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+- **Integração MetaTrader5**
+  ```bash
+  pip install -r requirements-mt5.txt
+  ```
+- **Desenvolvimento e testes**
+  ```bash
+  pip install -r requirements-dev.txt
+  ```
+
+Após a instalação, execute:
+```bash
+playwright install
+```
+
+### Frontend
+```bash
+npm install
+```
+
+## Variáveis de Ambiente
+
+Crie arquivos `.env` a partir dos modelos de exemplo e preencha com suas credenciais:
+
+### Backend
+```bash
+cp backend/.env.example backend/.env
+```
+Edite `backend/.env` com as configurações do banco, chave da API do Google Gemini e demais valores necessários.
+
+### Frontend
+```bash
+cp frontend/.env.example frontend/.env
+```
+Atualize `frontend/.env` com as URLs da API e a chave do Gemini antes de iniciar o projeto.
+
+## Executar Testes
+
+Backend:
+```bash
+pytest -q
+```
+
+Frontend:
+```bash
+npm test
+```
+
+## Subir o Projeto
+
+Backend (terminal 1):
+```bash
+python run_backend.py
+```
+
+Frontend (terminal 2):
+```bash
+npm run dev
+```
+
+O dashboard estará disponível em `http://localhost:3000` e as APIs em `http://localhost:5001/api`.
+
+## Documentação Avançada
+
+Detalhes sobre a integração MetaTrader5 estão em [INTEGRACAO_METATRADER5.md](INTEGRACAO_METATRADER5.md).

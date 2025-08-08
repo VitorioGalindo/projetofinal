@@ -1,8 +1,12 @@
 # backend/config.py
+import logging
 import os
-from dotenv import load_dotenv
 
-load_dotenv() # Carrega variáveis do arquivo .env
+from dotenv import load_dotenv
+from sqlalchemy import create_engine
+
+load_dotenv()  # Carrega variáveis do arquivo .env
+logger = logging.getLogger(__name__)
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'uma-chave-secreta-padrao-muito-segura'
@@ -41,5 +45,11 @@ def get_db_engine():
     uri = Config.SQLALCHEMY_DATABASE_URI
     if uri.startswith('sqlite'):
         print("AVISO: get_db_engine está usando o banco de dados em memória (SQLite) de fallback.")
-    
-    return create_engine(uri, pool_pre_ping=True)
+
+    try:
+        engine = create_engine(uri, pool_pre_ping=True)
+    except Exception as exc:
+        logger.exception("Falha ao criar a engine do banco de dados.")
+        raise
+
+    return engine

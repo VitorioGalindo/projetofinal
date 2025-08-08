@@ -31,3 +31,4 @@ export async function getStockGuideData(): Promise<StockGuideData[]> {
 }
 
 export const stockGuideService = { getStockGuideData };
+
