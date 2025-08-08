@@ -17,24 +17,19 @@ npm install
 
 ## Variáveis de Ambiente
 
-### `backend/.env`
-```env
-DB_HOST=cvm-insiders-db.cb2uq8cqs3dn.us-east-2.rds.amazonaws.com
-DB_PORT=5432
-DB_NAME=postgres
-DB_USER=pandora
-DB_PASSWORD=Pandora337303$
-FLASK_DEBUG=True
-PORT=5001
-```
+Crie arquivos `.env` a partir dos modelos de exemplo e preencha com suas credenciais:
 
-### `frontend/.env`
-```env
-REACT_APP_API_URL=http://localhost:5001/api
-REACT_APP_WS_URL=http://localhost:5001
-GEMINI_API_KEY=
-REACT_APP_ENV=development
+### Backend
+```bash
+cp backend/.env.example backend/.env
 ```
+Edite `backend/.env` com as configurações do banco, chave da API do Google Gemini e demais valores necessários.
+
+### Frontend
+```bash
+cp frontend/.env.example frontend/.env
+```
+Atualize `frontend/.env` com as URLs da API e a chave do Gemini antes de iniciar o projeto.
 
 ## Executar Testes
 
