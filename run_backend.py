@@ -47,8 +47,7 @@ def main():
     
     try:
         # Importar e criar aplicação
-        from backend.app import create_app
-        from backend.database import db
+        from backend import create_app, db
         
         # Criar aplicação Flask
         app = create_app()
