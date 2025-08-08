@@ -5,8 +5,24 @@ Este repositório contém o backend em Flask e o frontend em React/TypeScript.
 ## Instalação
 
 ### Backend
+Instale as dependências principais:
 ```bash
 pip install -r requirements.txt
+```
+
+Dependências opcionais:
+
+- **Integração MetaTrader5**
+  ```bash
+  pip install -r requirements-mt5.txt
+  ```
+- **Desenvolvimento e testes**
+  ```bash
+  pip install -r requirements-dev.txt
+  ```
+
+Após a instalação, execute:
+```bash
 playwright install
 ```
 
