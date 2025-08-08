@@ -7,8 +7,8 @@ import requests
 import json
 from datetime import datetime
 
-def test_route(method, url, data=None, expected_status=200):
-    """Testa uma rota específica"""
+def run_route(method, url, data=None, expected_status=200):
+    """Executa requisições para uma rota específica"""
     try:
         if method.upper() == 'GET':
             response = requests.get(url, timeout=10)
@@ -45,7 +45,7 @@ def main():
     
     # Verificar se servidor está disponível
     print("\n🔍 VERIFICANDO SERVIDOR...")
-    success, result = test_route('GET', f"{base_url}/../health")
+    success, result = run_route('GET', f"{base_url}/../health")
     if not success:
         print("❌ Servidor não disponível")
         print("💡 Execute: python run_backend_mt5.py")
@@ -96,7 +96,7 @@ def main():
         print(f"\n[{i:2d}/{total_count}] 🧪 {description}")
         print(f"   {method} {url}")
         
-        success, result = test_route(method, url, data)
+        success, result = run_route(method, url, data)
         
         if success:
             print(f"   ✅ SUCESSO!")
