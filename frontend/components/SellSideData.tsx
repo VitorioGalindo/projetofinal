@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SectorNode, StockGuideData } from '../types';
-import { sectorTreeData, mockStockGuideData } from '../constants';
+import { sectorTreeData } from '../constants';
+import { getStockGuideData } from '../services/stockGuideService';
 
 const SectorNodeComponent: React.FC<{ node: SectorNode; onSelect: (sector: string) => void; isRoot?: boolean }> = ({ node, onSelect, isRoot = false }) => {
     const hasChildren = node.children && node.children.length > 0;
@@ -147,10 +148,41 @@ const StockGuideTable: React.FC<{ data: StockGuideData[] }> = ({ data }) => {
     );
 };
 
+const StockGuideTableSkeleton: React.FC = () => {
+    const columns = 23; // acompanha o número de colunas da tabela real
+    return (
+        <div className="overflow-x-auto animate-pulse">
+            <table className="w-full text-xs">
+                <tbody>
+                    {Array.from({ length: 5 }).map((_, i) => (
+                        <tr key={i} className="border-b border-slate-700">
+                            {Array.from({ length: columns }).map((__, j) => (
+                                <td key={j} className="p-2">
+                                    <div className="h-4 bg-slate-700/50 rounded"></div>
+                                </td>
+                            ))}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+};
+
 
 const SellSideData: React.FC = () => {
     const [view, setView] = useState<'guide' | 'table'>('guide');
     const [selectedNode, setSelectedNode] = useState<string | null>(null);
+    const [stockGuideData, setStockGuideData] = useState<StockGuideData[]>([]);
+    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
+
+    useEffect(() => {
+        getStockGuideData()
+            .then(setStockGuideData)
+            .catch((e) => setError(e.message))
+            .finally(() => setLoading(false));
+    }, []);
 
     const handleSelectNode = (nodeName: string) => {
         setSelectedNode(nodeName);
@@ -183,8 +215,8 @@ const SellSideData: React.FC = () => {
         return subSectors;
     }
 
-    const filteredData = selectedNode 
-        ? mockStockGuideData.filter(d => getSubSectors(selectedNode).includes(d.sector)) 
+    const filteredData = selectedNode
+        ? stockGuideData.filter(d => getSubSectors(selectedNode).includes(d.sector))
         : [];
 
     const renderGuide = () => (
@@ -218,7 +250,13 @@ const SellSideData: React.FC = () => {
                             &larr; Voltar ao Guia de Setores
                         </button>
                     </div>
-                    <StockGuideTable data={filteredData} />
+                    {error ? (
+                        <div className="text-red-500">{error}</div>
+                    ) : loading ? (
+                        <StockGuideTableSkeleton />
+                    ) : (
+                        <StockGuideTable data={filteredData} />
+                    )}
                 </div>
             )}
         </div>
