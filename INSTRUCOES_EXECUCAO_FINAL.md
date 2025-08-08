@@ -10,27 +10,32 @@
 
 ### **2. Instalar Dependências**
 ```bash
-# Backend
-cd backend
+# Backend (Python)
 pip install -r requirements.txt
+playwright install
 
-# Frontend  
+# Frontend (Node)
 cd frontend
 npm install
+cd ..
 ```
 
-### **3. Executar Sistema**
+### **3. Executar Testes (opcional)**
+```bash
+pytest -q
+```
+
+### **4. Executar Sistema**
 ```bash
 # Terminal 1 - Backend
-cd backend
 python run_backend.py
 
 # Terminal 2 - Frontend
-cd frontend  
+cd frontend
 npm start
 ```
 
-### **4. Acessar Dashboard**
+### **5. Acessar Dashboard**
 - **Frontend:** http://localhost:3000
 - **APIs:** http://localhost:5001/api
 
