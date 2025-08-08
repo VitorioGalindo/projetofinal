@@ -8,6 +8,7 @@ import os
 import sys
 import logging
 from dotenv import load_dotenv
+from sqlalchemy import text
 
 # Carregar .env ANTES de tudo
 load_dotenv()
@@ -63,17 +64,17 @@ def main():
         with app.app_context():
             db.init_app(app)
             logger.info("✅ SQLAlchemy inicializado")
-            
+
             # Testar conexão PostgreSQL
             try:
-                db.engine.execute('SELECT 1')
+                db.session.execute(text('SELECT 1'))
                 logger.info("✅ PostgreSQL conectado")
-                
+
                 # Contar empresas
                 from backend.models import Company
                 total_companies = Company.query.count()
                 logger.info(f"📊 Total de empresas: {total_companies}")
-                
+
             except Exception as e:
                 logger.warning(f"⚠️ PostgreSQL não disponível: {e}")
                 logger.info("🔄 Sistema funcionará com fallbacks")
