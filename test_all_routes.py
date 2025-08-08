@@ -8,6 +8,7 @@ import requests
 import json
 import time
 import sys
+import pytest
 
 BASE_URL = "http://localhost:5001"
 
@@ -48,7 +49,7 @@ def run_endpoint(method, endpoint, description=""):
         print(f"❌ {endpoint} - Erro: {str(e)}")
         return False
 
-def run_all_routes():
+def test_all_routes():
     """Executa todos os endpoints com a estrutura corrigida"""
     
     print("🧪 TESTE COMPLETO - ESTRUTURA CORRIGIDA")
@@ -59,21 +60,19 @@ def run_all_routes():
     # Verificar se servidor está disponível
     try:
         response = requests.get(f"{BASE_URL}/health", timeout=5)
-        if response.status_code == 200:
-            print("✅ Servidor respondendo!")
-            data = response.json()
-            print(f"   📊 Versão: {data.get('version', 'N/A')}")
-            print(f"   📊 Database: {data.get('database', 'N/A')}")
-            print(f"   📊 MetaTrader5: {data.get('metatrader5', 'N/A')}")
-        else:
-            print(f"⚠️ Servidor responde mas com status {response.status_code}")
-    except:
+        assert response.status_code == 200, f"Status {response.status_code}"
+        print("✅ Servidor respondendo!")
+        data = response.json()
+        print(f"   📊 Versão: {data.get('version', 'N/A')}")
+        print(f"   📊 Database: {data.get('database', 'N/A')}")
+        print(f"   📊 MetaTrader5: {data.get('metatrader5', 'N/A')}")
+    except Exception:
         print("❌ Servidor não está respondendo")
         print("\n💡 Para executar este teste:")
         print("1. Execute: python run_backend_mt5_corrigido.py")
         print("2. Aguarde ver: '🚀 Servidor pronto!'")
         print("3. Execute este teste novamente")
-        return False
+        pytest.fail("Servidor não está respondendo")
     
     # Lista completa de endpoints baseada na estrutura corrigida
     endpoints = [
@@ -171,10 +170,10 @@ def run_all_routes():
     else:
         print("🔴 CRÍTICO: Sistema com muitos problemas")
         print("❌ Muitas rotas não funcionando")
-    
-    return success_rate >= 70
 
-def run_metatrader5_integration():
+    assert success_rate >= 70, f"Sucesso em apenas {success_rate:.1f}% das rotas"
+
+def test_metatrader5_integration():
     """Executa testes específicos da integração MetaTrader5"""
     print("\n⚡ TESTE ESPECÍFICO METATRADER5")
     print("=" * 40)
@@ -193,45 +192,36 @@ def run_metatrader5_integration():
             mt5_working += 1
     
     mt5_rate = (mt5_working / len(mt5_endpoints)) * 100
-    
+
     print(f"\n📊 MetaTrader5 Status: {mt5_rate:.1f}% funcionando")
     if mt5_rate >= 80:
         print("✅ MetaTrader5 integração funcionando bem!")
     else:
         print("⚠️ MetaTrader5 integração precisa de atenção")
-    
-    return mt5_rate >= 80
 
-def run_database_connection():
+    assert mt5_rate >= 80, f"Apenas {mt5_rate:.1f}% dos endpoints do MT5 funcionaram"
+
+def test_database_connection():
     """Executa teste de conexão com banco de dados"""
     print("\n💾 TESTE CONEXÃO BANCO DE DADOS")
     print("=" * 40)
     
     try:
         response = requests.get(f"{BASE_URL}/api/health", timeout=10)
-        if response.status_code == 200:
-            data = response.json()
-            db_status = data.get('database', 'unknown')
-            total_companies = data.get('total_companies', 0)
-            
-            print(f"📊 Status do banco: {db_status}")
-            print(f"📊 Total de empresas: {total_companies}")
-            
-            if db_status == "connected" and total_companies > 1000:
-                print("✅ Banco de dados funcionando perfeitamente!")
-                return True
-            elif db_status == "connected":
-                print("⚠️ Banco conectado mas com poucos dados")
-                return True
-            else:
-                print("❌ Problema na conexão do banco")
-                return False
-        else:
-            print("❌ Não foi possível verificar status do banco")
-            return False
+        assert response.status_code == 200, "Não foi possível verificar status do banco"
+        data = response.json()
+        db_status = data.get('database', 'unknown')
+        total_companies = data.get('total_companies', 0)
+
+        print(f"📊 Status do banco: {db_status}")
+        print(f"📊 Total de empresas: {total_companies}")
+
+        assert db_status == "connected", f"Status do banco: {db_status}"
+        if total_companies <= 1000:
+            print("⚠️ Banco conectado mas com poucos dados")
     except Exception as e:
         print(f"❌ Erro ao testar banco: {e}")
-        return False
+        pytest.fail(f"Erro ao testar banco: {e}")
 
 def main():
     """Função principal"""
@@ -242,9 +232,25 @@ def main():
     print("=" * 60)
     
     # Executar todos os testes
-    routes_ok = run_all_routes()
-    mt5_ok = run_metatrader5_integration()
-    db_ok = run_database_connection()
+    routes_ok = mt5_ok = db_ok = False
+
+    try:
+        test_all_routes()
+        routes_ok = True
+    except AssertionError as e:
+        print(f"❌ test_all_routes falhou: {e}")
+
+    try:
+        test_metatrader5_integration()
+        mt5_ok = True
+    except AssertionError as e:
+        print(f"❌ test_metatrader5_integration falhou: {e}")
+
+    try:
+        test_database_connection()
+        db_ok = True
+    except AssertionError as e:
+        print(f"❌ test_database_connection falhou: {e}")
     
     # Resultado final
     print(f"\n{'='*60}")
@@ -271,7 +277,7 @@ def main():
     
     print("='*60")
     
-    return routes_ok and mt5_ok
+    return routes_ok and mt5_ok and db_ok
 
 if __name__ == '__main__':
     success = main()
