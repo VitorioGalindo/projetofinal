@@ -1,5 +1,5 @@
 import React from 'react';
-import { Page, SectorNode, StockGuideData } from './types';
+import { Page, SectorNode } from './types';
 
 export const navigationItems: { id: Page; name: string; icon: React.ReactNode }[] = [
   { id: 'portfolio', name: 'Carteira em Tempo Real', icon: <ChartPieIcon /> },
@@ -53,17 +53,6 @@ export const sectorTreeData: SectorNode[] = [
     { name: 'Tecnologia e mídia' },
 ];
 
-export const mockStockGuideData: StockGuideData[] = [
-    // Bancos
-    { sector: 'Grandes bancos', company: 'Itaú', ticker: 'ITUB4', rating: 'Buy', marketCap: 357946, volume: { media12M: 1101, pctMedia: 134 }, price: { ultimo: 35.07, alvo: 40.00, upside: 14 }, performance: { semana: 0, mes: -5, ano: 33 }, pl: { '2025E': 7.6, '2026E': 7.1 }, evEbitda: { '2025E': 'n.a.', '2026E': 'n.a.' }, pvp: { '2025E': 1.9, '2026E': 1.7 }, dividendYield: { '2025E': 7.9, '2026E': 8.5 }, dividaLiquidaEbitda: { '2025E': 'n.a.', '2026E': 'n.a.' }, roe: { '2025E': 22.3, '2026E': 22.7 } },
-    { sector: 'Grandes bancos', company: 'Bradesco', ticker: 'BBDC4', rating: 'Neutral', marketCap: 153984, volume: { media12M: 524, pctMedia: 131 }, price: { ultimo: 15.67, alvo: 18.00, upside: 2 }, performance: { semana: -2, mes: -5, ano: 48 }, pl: { '2025E': 6.9, '2026E': 6.3 }, evEbitda: { '2025E': 'n.a.', '2026E': 'n.a.' }, pvp: { '2025E': 1.0, '2026E': 0.9 }, dividendYield: { '2025E': 8.0, '2026E': 8.5 }, dividaLiquidaEbitda: { '2025E': 'n.a.', '2026E': 'n.a.' }, roe: { '2025E': 14.8, '2026E': 15.6 } },
-    { sector: 'Grandes bancos', company: 'Banco do Brasil', ticker: 'BBAS3', rating: 'Neutral', marketCap: 115653, volume: { media12M: 556, pctMedia: 156 }, price: { ultimo: 20.26, alvo: 30.00, upside: 48 }, performance: { semana: -4, mes: -8, ano: -13 }, pl: { '2025E': 3.3, '2026E': 2.9 }, evEbitda: { '2025E': 'n.a.', '2026E': 'n.a.' }, pvp: { '2025E': 0.6, '2026E': 0.6 }, dividendYield: { '2025E': 10.6, '2026E': 10.6 }, dividaLiquidaEbitda: { '2025E': 'n.a.', '2026E': 'n.a.' }, roe: { '2025E': 15.6, '2026E': 16.5 } },
-    { isMedian: true, sector: 'Grandes bancos', company: 'Mediana', ticker: '', rating: '', marketCap: 153984, volume: { media12M: 556, pctMedia: 132 }, price: { ultimo: 20.26, alvo: 30.00, upside: 19 }, performance: { semana: -2, mes: -6, ano: 22 }, pl: { '2025E': 6.6, '2026E': 6.9 }, evEbitda: { '2025E': 'n.a.', '2026E': 'n.a.' }, pvp: { '2025E': 1.0, '2026E': 0.9 }, dividendYield: { '2025E': 8.0, '2026E': 9.0 }, dividaLiquidaEbitda: { '2025E': 'n.a.', '2026E': 'n.a.' }, roe: { '2025E': 15.7, '2026E': 16.7 } },
-    // Varejo
-    { sector: 'Vestuário', company: 'CVC Brasil', ticker: 'CVCB3', rating: 'Buy', marketCap: 1254, volume: { media12M: 41, pctMedia: 59 }, price: { ultimo: 2.39, alvo: 'n.a.', upside: 0 }, performance: { semana: 2, mes: 0, ano: 73 }, pl: { '2025E': 'n.a.', '2026E': 12.4 }, evEbitda: { '2025E': 4.0, '2026E': 3.1 }, pvp: { '2025E': 'n.a.', '2026E': 1.7 }, dividendYield: { '2025E': 0.0, '2026E': 0.0 }, dividaLiquidaEbitda: { '2025E': 1.7, '2026E': 'n.a.' }, roe: { '2025E': -1.7, '2026E': 17.5 } },
-    { sector: 'Vestuário', company: 'Magazine Luiza', ticker: 'MGLU3', rating: 'Buy', marketCap: 5805, volume: { media12M: 250, pctMedia: 75 }, price: { ultimo: 7.88, alvo: 14.00, upside: 78 }, performance: { semana: 2, mes: -20, ano: 25 }, pl: { '2025E': 14.1, '2026E': 7.8 }, evEbitda: { '2025E': 3.4, '2026E': 2.8 }, pvp: { '2025E': 0.5, '2026E': 0.5 }, dividendYield: { '2025E': 0.0, '2026E': 0.0 }, dividaLiquidaEbitda: { '2025E': 0.0, '2026E': -0.8 }, roe: { '2025E': 3.8, '2026E': 6.2 } },
-    { isMedian: true, sector: 'Vestuário', company: 'Mediana', ticker: '', rating: '', marketCap: 3529, volume: { media12M: 145, pctMedia: 67 }, price: { ultimo: 5.14, alvo: 14.00, upside: 39 }, performance: { semana: 2, mes: -10, ano: 49 }, pl: { '2025E': 14.1, '2026E': 10.1 }, evEbitda: { '2025E': 3.7, '2026E': 3.0 }, pvp: { '2025E': 0.5, '2026E': 1.1 }, dividendYield: { '2025E': 0.0, '2026E': 0.0 }, dividaLiquidaEbitda: { '2025E': 0.9, '2026E': -0.4 }, roe: { '2025E': 1.1, '2026E': 11.9 } },
-];
 
 // --- SVG Icons (Heroicons) ---
 export function ArrowsPointingOutIcon({ className = "w-4 h-4" }: { className?: string }) { return <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" /></svg>;}
