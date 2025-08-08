@@ -2,6 +2,8 @@
 """
 Script para testar cotações MetaTrader5 - VERSÃO CORRIGIDA
 Não depende de seleção de símbolos
+
+Requer as variáveis de ambiente ``MT5_LOGIN``, ``MT5_PASSWORD`` e ``MT5_SERVER`` definidas.
 """
 
 import os
@@ -25,10 +27,16 @@ def test_mt5_quotes_fixed():
         return
     
     # Configurações
-    MT5_LOGIN = int(os.getenv("MT5_LOGIN", "5223688"))
-    MT5_PASSWORD = os.getenv("MT5_PASSWORD", "Pandora337303$")
-    MT5_SERVER = os.getenv("MT5_SERVER", "BancoBTGPactual-PRD")
-    
+    try:
+        MT5_LOGIN = int(os.environ["MT5_LOGIN"])
+        MT5_PASSWORD = os.environ["MT5_PASSWORD"]
+        MT5_SERVER = os.environ["MT5_SERVER"]
+    except KeyError as e:
+        raise EnvironmentError(
+            f"Variável de ambiente {e.args[0]} não definida. "
+            "Configure MT5_LOGIN, MT5_PASSWORD e MT5_SERVER antes de rodar o teste."
+        ) from e
+
     print(f"🔐 Login: {MT5_LOGIN}")
     print(f"🌐 Servidor: {MT5_SERVER}")
     

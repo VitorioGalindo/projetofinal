@@ -54,6 +54,17 @@ Backend:
 pytest -q
 ```
 
+### Testes com MetaTrader5
+
+Alguns testes dependem de credenciais do MetaTrader5. Defina as variáveis de ambiente antes de executá-los:
+
+```bash
+export MT5_LOGIN=seu_login
+export MT5_PASSWORD=sua_senha
+export MT5_SERVER=seu_servidor
+pytest -q test_cotacoes_mt5.py
+```
+
 Frontend:
 ```bash
 npm test
