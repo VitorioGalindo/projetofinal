@@ -148,6 +148,24 @@ const StockGuideTable: React.FC<{ data: StockGuideData[] }> = ({ data }) => {
     );
 };
 
+const StockGuideTableSkeleton: React.FC = () => (
+    <div className="overflow-x-auto animate-pulse">
+        <table className="w-full text-xs">
+            <tbody>
+                {Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={i} className="border-b border-slate-700">
+                        {Array.from({ length: 10 }).map((__, j) => (
+                            <td key={j} className="p-2">
+                                <div className="h-4 bg-slate-700/50 rounded"></div>
+                            </td>
+                        ))}
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+    </div>
+);
+
 
 const SellSideData: React.FC = () => {
     const [view, setView] = useState<'guide' | 'table'>('guide');
@@ -232,7 +250,7 @@ const SellSideData: React.FC = () => {
                     {error ? (
                         <div className="text-red-500">{error}</div>
                     ) : loading ? (
-                        <div className="text-white">Carregando...</div>
+
                     ) : (
                         <StockGuideTable data={filteredData} />
                     )}
