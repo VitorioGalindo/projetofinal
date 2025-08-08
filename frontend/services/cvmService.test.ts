@@ -17,6 +17,11 @@ describe('cvmService', () => {
     expect(companies).toEqual(mockCompanies);
   });
 
+  it('getCompanies lança erro quando resposta não ok', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }));
+    await expect(cvmService.getCompanies()).rejects.toThrow('Erro ao buscar empresas');
+  });
+
   it('getDocumentTypes retorna lista de categorias', async () => {
     const mockTypes = [{ code: 'CAT', description: 'Categoria' }];
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
@@ -25,6 +30,11 @@ describe('cvmService', () => {
     }));
     const types = await cvmService.getDocumentTypes();
     expect(types).toEqual(mockTypes);
+  });
+
+  it('getDocumentTypes lança erro quando resposta não ok', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }));
+    await expect(cvmService.getDocumentTypes()).rejects.toThrow('Erro ao buscar tipos de documento');
   });
 
   it('getDocuments usa endpoint por empresa quando companyId informado', async () => {
@@ -54,5 +64,10 @@ describe('cvmService', () => {
       subject: 'Title',
       link: 'http://exemplo'
     });
+  });
+
+  it('getDocuments lança erro quando resposta não ok', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }));
+    await expect(cvmService.getDocuments()).rejects.toThrow('Erro ao buscar documentos');
   });
 });

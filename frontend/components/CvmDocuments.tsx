@@ -44,6 +44,8 @@ const CvmDocuments: React.FC = () => {
     const [selectedDocumentType, setSelectedDocumentType] = useState<string>('');
     const [dateRange, setDateRange] = useState<string>('');
     const [documents, setDocuments] = useState<CvmDocument[]>([]);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const loadFilters = async () => {
@@ -59,14 +61,23 @@ const CvmDocuments: React.FC = () => {
     useEffect(() => {
         const fetchDocs = async () => {
             const [start, end] = parseDateRange(dateRange);
-            const docs = await cvmService.getDocuments({
-                companyId: selectedCompany ? Number(selectedCompany) : undefined,
-                documentType: selectedDocumentType || undefined,
-                startDate: start,
-                endDate: end,
-                limit: 50,
-            });
-            setDocuments(docs);
+            setLoading(true);
+            setError(null);
+            try {
+                const docs = await cvmService.getDocuments({
+                    companyId: selectedCompany ? Number(selectedCompany) : undefined,
+                    documentType: selectedDocumentType || undefined,
+                    startDate: start,
+                    endDate: end,
+                    limit: 50,
+                });
+                setDocuments(docs);
+            } catch (e: any) {
+                setDocuments([]);
+                setError(e?.message || 'Erro ao carregar documentos');
+            } finally {
+                setLoading(false);
+            }
         };
         fetchDocs();
     }, [selectedCompany, selectedDocumentType, dateRange]);
@@ -107,36 +118,47 @@ const CvmDocuments: React.FC = () => {
             </div>
 
             <div>
-                <p className="text-md font-semibold text-white mb-4">
-                    Exibindo {documents.length} documentos encontrados
-                </p>
-                <div className="overflow-x-auto border border-slate-700 rounded-lg">
-                    <table className="w-full text-sm text-left">
-                        <thead className="bg-slate-700/50 text-xs text-slate-400 uppercase">
-                            <tr>
-                                {['Data', 'Empresa', 'Categoria', 'Assunto', 'Link'].map(h => (
-                                    <th key={h} scope="col" className="px-6 py-3 font-medium tracking-wider">{h}</th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-700">
-                            {documents.map((doc) => (
-                                <tr key={doc.id} className="hover:bg-slate-700/30">
-                                    <td className="px-6 py-4 whitespace-nowrap text-slate-300">{doc.date}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap font-medium text-white">{doc.company}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-slate-300">{doc.category}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-slate-300">{doc.subject}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <a href={doc.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-sky-400 hover:text-sky-300 font-semibold">
-                                            Abrir
-                                            <ArrowTopRightOnSquareIcon className="w-4 h-4" />
-                                        </a>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                {loading ? (
+                    <div className="flex justify-center py-10" role="status">
+                        <div className="w-8 h-8 border-4 border-sky-400 border-t-transparent rounded-full animate-spin" />
+                        <span className="sr-only">Carregando...</span>
+                    </div>
+                ) : error ? (
+                    <p className="text-red-500">{error}</p>
+                ) : (
+                    <>
+                        <p className="text-md font-semibold text-white mb-4">
+                            Exibindo {documents.length} documentos encontrados
+                        </p>
+                        <div className="overflow-x-auto border border-slate-700 rounded-lg">
+                            <table className="w-full text-sm text-left">
+                                <thead className="bg-slate-700/50 text-xs text-slate-400 uppercase">
+                                    <tr>
+                                        {['Data', 'Empresa', 'Categoria', 'Assunto', 'Link'].map(h => (
+                                            <th key={h} scope="col" className="px-6 py-3 font-medium tracking-wider">{h}</th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-700">
+                                    {documents.map((doc) => (
+                                        <tr key={doc.id} className="hover:bg-slate-700/30">
+                                            <td className="px-6 py-4 whitespace-nowrap text-slate-300">{doc.date}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap font-medium text-white">{doc.company}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-slate-300">{doc.category}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-slate-300">{doc.subject}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <a href={doc.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-sky-400 hover:text-sky-300 font-semibold">
+                                                    Abrir
+                                                    <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </>
+                )}
             </div>
         </div>
     );
