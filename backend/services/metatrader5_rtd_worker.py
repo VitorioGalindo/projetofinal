@@ -172,6 +172,15 @@ class MetaTrader5RTDWorker:
             self.failed_symbols.add(symbol)
             return False
 
+    # --- Legacy compatibility methods ---
+    def initialize(self):
+        """Alias para initialize_mt5 para compatibilidade retroativa."""
+        return self.initialize_mt5()
+
+    def activate_realtime_for_symbol(self, symbol: str):
+        """Alias para _activate_realtime_for_symbol para compatibilidade retroativa."""
+        return self._activate_realtime_for_symbol(symbol)
+
     def get_mt5_quote(self, ticker: str) -> Optional[Dict]:
         """
         Obtém cotação EM TEMPO REAL do MetaTrader5.
