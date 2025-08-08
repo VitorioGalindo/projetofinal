@@ -82,29 +82,15 @@ def main():
             
             logger.info("🔄 Inicializando MetaTrader5 Worker...")
             mt5_worker = MetaTrader5RTDWorker()
-            
-            if mt5_worker.initialize():
-                logger.info("✅ MetaTrader5 Worker inicializado")
-                
-                # Ativar tempo real para símbolos principais
-                principais = ['VALE3', 'PETR4', 'ITUB4', 'BBDC4', 'ABEV3']
-                logger.info("🚀 ATIVANDO TEMPO REAL PARA SÍMBOLOS PRINCIPAIS...")
-                
-                for symbol in principais:
-                    if mt5_worker.activate_realtime_for_symbol(symbol):
-                        logger.info(f"✅ {symbol}: Tempo real ATIVO")
-                    else:
-                        logger.warning(f"⚠️ {symbol}: Tempo real não disponível")
-                
-                # Iniciar worker
-                mt5_worker.start()
-                logger.info("🔄 MetaTrader5 Worker iniciado")
-                
-                # Armazenar worker no app
-                app.mt5_worker = mt5_worker
-                
-            else:
-                logger.warning("⚠️ MetaTrader5 não disponível")
+
+            mt5_worker.start()  # já inicializa MT5 internamente
+
+            principais = ["VALE3", "PETR4", "ITUB4", "BBDC4", "ABEV3"]
+            for symbol in principais:
+                mt5_worker.subscribe_ticker("startup", symbol)  # ativa tempo real
+
+            app.mt5_worker = mt5_worker
+            logger.info("✅ MetaTrader5 Worker em execução")
                 
         except Exception as e:
             logger.warning(f"⚠️ Erro ao inicializar MetaTrader5: {e}")
