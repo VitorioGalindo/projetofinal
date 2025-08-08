@@ -291,6 +291,20 @@ export interface CvmDocument {
   link: string;
 }
 
+export interface CvmCompany {
+  id: number;
+  cvm_code: number;
+  company_name: string;
+  ticker: string;
+  cnpj: string;
+}
+
+export interface CvmDocumentType {
+  code: string;
+  name: string;
+  description: string;
+}
+
 // Market Overview Page Types
 export interface MarketPerformanceItem {
   name: string;
