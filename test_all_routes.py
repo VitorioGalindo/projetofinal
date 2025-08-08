@@ -11,8 +11,8 @@ import sys
 
 BASE_URL = "http://localhost:5001"
 
-def test_endpoint(method, endpoint, description=""):
-    """Testar um endpoint específico"""
+def run_endpoint(method, endpoint, description=""):
+    """Executa um endpoint específico"""
     url = f"{BASE_URL}{endpoint}"
     
     try:
@@ -48,8 +48,8 @@ def test_endpoint(method, endpoint, description=""):
         print(f"❌ {endpoint} - Erro: {str(e)}")
         return False
 
-def test_all_routes():
-    """Testar todas as rotas baseado na estrutura corrigida"""
+def run_all_routes():
+    """Executa todos os endpoints com a estrutura corrigida"""
     
     print("🧪 TESTE COMPLETO - ESTRUTURA CORRIGIDA")
     print("=" * 60)
@@ -129,7 +129,7 @@ def test_all_routes():
     results = []
     for i, (endpoint, description) in enumerate(endpoints, 1):
         print(f"[{i:2d}/{len(endpoints)}] ", end="")
-        result = test_endpoint("GET", endpoint, description)
+        result = run_endpoint("GET", endpoint, description)
         results.append((endpoint, result))
         time.sleep(0.3)  # Pausa entre testes
     
@@ -174,8 +174,8 @@ def test_all_routes():
     
     return success_rate >= 70
 
-def test_metatrader5_integration():
-    """Testar especificamente a integração MetaTrader5"""
+def run_metatrader5_integration():
+    """Executa testes específicos da integração MetaTrader5"""
     print("\n⚡ TESTE ESPECÍFICO METATRADER5")
     print("=" * 40)
     
@@ -189,7 +189,7 @@ def test_metatrader5_integration():
     
     mt5_working = 0
     for endpoint, description in mt5_endpoints:
-        if test_endpoint("GET", endpoint, description):
+        if run_endpoint("GET", endpoint, description):
             mt5_working += 1
     
     mt5_rate = (mt5_working / len(mt5_endpoints)) * 100
@@ -202,8 +202,8 @@ def test_metatrader5_integration():
     
     return mt5_rate >= 80
 
-def test_database_connection():
-    """Testar conexão com banco de dados"""
+def run_database_connection():
+    """Executa teste de conexão com banco de dados"""
     print("\n💾 TESTE CONEXÃO BANCO DE DADOS")
     print("=" * 40)
     
@@ -242,9 +242,9 @@ def main():
     print("=" * 60)
     
     # Executar todos os testes
-    routes_ok = test_all_routes()
-    mt5_ok = test_metatrader5_integration()
-    db_ok = test_database_connection()
+    routes_ok = run_all_routes()
+    mt5_ok = run_metatrader5_integration()
+    db_ok = run_database_connection()
     
     # Resultado final
     print(f"\n{'='*60}")
@@ -276,3 +276,4 @@ def main():
 if __name__ == '__main__':
     success = main()
     sys.exit(0 if success else 1)
+
