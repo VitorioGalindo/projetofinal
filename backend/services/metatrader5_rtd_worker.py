@@ -388,17 +388,18 @@ class MetaTrader5RTDWorker:
         """Inicia o worker RTD em uma thread separada."""
         if self.running:
             logger.warning("⚠️ Worker já está rodando.")
-            return
-            
+            return True
+
         logger.info("🚀 Iniciando MetaTrader5 RTD Worker TEMPO REAL...")
-        if not self.initialize_mt5():
+        if not self.mt5_connected and not self.initialize_mt5():
             logger.critical("❌ Falha na inicialização do MT5. O worker não será iniciado.")
-            return
-            
+            return False
+
         self.running = True
         self.worker_thread = threading.Thread(target=self._price_update_loop, daemon=True)
         self.worker_thread.start()
         logger.info("✅ MetaTrader5 RTD Worker TEMPO REAL iniciado com sucesso.")
+        return True
     
     def stop(self):
         """Para o worker RTD e desliga a conexão com o MT5."""
