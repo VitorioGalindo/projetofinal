@@ -102,7 +102,7 @@ class MetaTrader5RTDWorker:
         try:
             # Inicializar MT5
             if not mt5.initialize():
-                logger.error("❌ Falha ao inicializar MetaTrader5")
+                logger.error(f"❌ Falha ao inicializar MetaTrader5: {mt5.last_error()}")
                 return False
             
             # Fazer login
