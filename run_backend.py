@@ -78,12 +78,10 @@ def main():
         
         # Inicializar MetaTrader5 Worker
         try:
-            from backend.services.metatrader5_rtd_worker import MetaTrader5RTDWorker
-            
-            logger.info("🔄 Inicializando MetaTrader5 Worker...")
-            mt5_worker = MetaTrader5RTDWorker()
+            from backend.services.metatrader5_rtd_worker import initialize_rtd_worker
 
-            mt5_worker.start()  # já inicializa MT5 internamente
+            logger.info("🔄 Inicializando MetaTrader5 Worker...")
+            mt5_worker = initialize_rtd_worker(None)
 
             principais = ["VALE3", "PETR4", "ITUB4", "BBDC4", "ABEV3"]
             for symbol in principais:
@@ -91,7 +89,7 @@ def main():
 
             app.mt5_worker = mt5_worker
             logger.info("✅ MetaTrader5 Worker em execução")
-                
+
         except Exception as e:
             logger.warning(f"⚠️ Erro ao inicializar MetaTrader5: {e}")
         
