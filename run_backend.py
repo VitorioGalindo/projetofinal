@@ -83,12 +83,17 @@ def main():
             logger.info("🔄 Inicializando MetaTrader5 Worker...")
             mt5_worker = initialize_rtd_worker(None)
 
+            if not getattr(mt5_worker, "mt5_connected", False):
+                logger.warning("MT5 não conectado, usando dados simulados")
+
+            if getattr(mt5_worker, "running", False):
+                logger.info("✅ MetaTrader5 Worker em execução")
+
             principais = ["VALE3", "PETR4", "ITUB4", "BBDC4", "ABEV3"]
             for symbol in principais:
                 mt5_worker.subscribe_ticker("startup", symbol)  # ativa tempo real
 
             app.mt5_worker = mt5_worker
-            logger.info("✅ MetaTrader5 Worker em execução")
 
         except Exception as e:
             logger.warning(f"⚠️ Erro ao inicializar MetaTrader5: {e}")
