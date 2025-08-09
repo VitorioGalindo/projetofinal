@@ -23,7 +23,7 @@ try:
     logger.info("✅ MetaTrader5 disponível")
 except ImportError:
     MT5_AVAILABLE = False
-    logger.warning("⚠️ MetaTrader5 não disponível - usando dados simulados")
+    logger.warning("⚠️ MetaTrader5 não disponível - conexão MT5 inativa")
 
 class MetaTrader5RTDWorker:
     """
@@ -102,9 +102,10 @@ class MetaTrader5RTDWorker:
         try:
             # Inicializar MT5
             if not mt5.initialize():
+
                 logger.error("❌ Falha ao inicializar MetaTrader5")
                 raise RuntimeError("Falha ao inicializar MetaTrader5")
-
+           
             # Fazer login
             if not mt5.login(self.MT5_LOGIN, password=self.MT5_PASSWORD, server=self.MT5_SERVER):
                 error_msg = mt5.last_error()
@@ -198,13 +199,14 @@ class MetaTrader5RTDWorker:
         PRIORIDADE ABSOLUTA PARA TICKS EM TEMPO REAL.
         """
         if not self.mt5_connected or not MT5_AVAILABLE:
-            return self._get_simulated_quote(ticker)
-            
+            logger.error(f"❌ MT5 não conectado. Não é possível obter cotação para {ticker}")
+            return None
+
         try:
             # Verificar se ticker existe
             if ticker not in self.mt5_symbols:
                 logger.warning(f"⚠️ Ticker '{ticker}' não encontrado")
-                return self._get_simulated_quote(ticker)
+                return None
             
             # PRIORIDADE 1: Se já tem tempo real ativo, usar tick
             if ticker in self.realtime_symbols:
@@ -212,7 +214,7 @@ class MetaTrader5RTDWorker:
                 if tick and tick.bid > 0:
                     return self._format_realtime_quote(ticker, tick)
                 else:
-                    logger.warning(f"⚠️ {ticker}: Tempo real ativo mas tick indisponível")
+                    logger.warning(f"⚠️ {ticker}: tempo real ativo, mas tick inválido")
             
             # PRIORIDADE 2: Tentar ativar tempo real AGORA
             if ticker not in self.failed_symbols:
@@ -228,18 +230,18 @@ class MetaTrader5RTDWorker:
                 return self._format_realtime_quote(ticker, tick)
             
             # ÚLTIMO RECURSO: Dados mais recentes possíveis (M1)
-            logger.warning(f"⚠️ {ticker}: Usando dados M1 como último recurso")
+            logger.warning(f"⚠️ {ticker}: usando dados M1 como último recurso")
             rates = mt5.copy_rates_from_pos(ticker, mt5.TIMEFRAME_M1, 0, 1)
             if rates is not None and len(rates) > 0:
                 rate = rates[0]
                 return self._format_quote_from_rate(ticker, rate, "M1_fallback")
-            
-            logger.warning(f"⚠️ {ticker}: Nenhum método funcionou, usando simulação")
-            return self._get_simulated_quote(ticker)
-            
+
+            logger.error(f"❌ {ticker}: nenhum tick válido encontrado")
+            return None
+
         except Exception as e:
             logger.error(f"❌ Erro ao obter cotação para {ticker}: {e}")
-            return self._get_simulated_quote(ticker)
+            return None
 
     def _format_realtime_quote(self, ticker: str, tick) -> Dict:
         """Formata cotação em tempo real."""
@@ -273,43 +275,6 @@ class MetaTrader5RTDWorker:
             "open": float(rate['open']),
             "high": float(rate['high']),
             "low": float(rate['low']),
-            "is_realtime": False
-        }
-
-    def _get_simulated_quote(self, ticker: str) -> Dict:
-        """Gera cotação simulada em tempo real."""
-        import random
-        
-        # Preços base atualizados
-        base_prices = {
-            'VALE3': 53.41,
-            'PETR4': 32.53,
-            'ITUB4': 34.92,
-            'BBDC4': 15.46,
-            'ABEV3': 12.37,
-            'PRJO3': 4.85,
-            'MGLU3': 8.90,
-            'WEGE3': 45.60,
-            'RENT3': 58.30,
-            'LREN3': 18.70
-        }
-        
-        base_price = base_prices.get(ticker, 25.00)
-        variation = random.uniform(-0.002, 0.002)  # ±0.2% para simular movimento tempo real
-        current_price = base_price * (1 + variation)
-        volume = random.randint(1000, 100000)
-        
-        return {
-            "symbol": ticker,
-            "bid": round(current_price * 0.999, 2),
-            "ask": round(current_price * 1.001, 2),
-            "last": round(current_price, 2),
-            "volume": volume,
-            "time": datetime.now().isoformat(),
-            "source": "simulated_realtime",
-            "price": round(current_price, 2),
-            "change": round(base_price * variation, 2),
-            "change_percent": round(variation * 100, 2),
             "is_realtime": False
         }
 
@@ -389,21 +354,23 @@ class MetaTrader5RTDWorker:
         """Inicia o worker RTD em uma thread separada."""
         if self.running:
             logger.warning("⚠️ Worker já está rodando.")
-            return
-            
+            return True
+
         logger.info("🚀 Iniciando MetaTrader5 RTD Worker TEMPO REAL...")
+
         try:
             self.initialize_mt5()
         except RuntimeError as e:
             logger.critical(
                 f"❌ Falha na inicialização do MT5. O worker não será iniciado: {e}"
             )
-            raise
+            raise  
 
         self.running = True
         self.worker_thread = threading.Thread(target=self._price_update_loop, daemon=True)
         self.worker_thread.start()
         logger.info("✅ MetaTrader5 RTD Worker TEMPO REAL iniciado com sucesso.")
+        return True
     
     def stop(self):
         """Para o worker RTD e desliga a conexão com o MT5."""

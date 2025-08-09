@@ -77,15 +77,23 @@ def main():
                 logger.info("🔄 Sistema funcionará com fallbacks")
         
         # Inicializar MetaTrader5 Worker
-        try:
-            from backend.services.metatrader5_rtd_worker import initialize_rtd_worker
+        from backend.services.metatrader5_rtd_worker import MetaTrader5RTDWorker
 
-            logger.info("🔄 Inicializando MetaTrader5 Worker...")
-            mt5_worker = initialize_rtd_worker(None)
+        logger.info("🔄 Inicializando MetaTrader5 Worker...")
+        mt5_worker = MetaTrader5RTDWorker(None)
 
-            principais = ["VALE3", "PETR4", "ITUB4", "BBDC4", "ABEV3"]
-            for symbol in principais:
-                mt5_worker.subscribe_ticker("startup", symbol)  # ativa tempo real
+        from backend.services.metatrader5_rtd_worker import MetaTrader5RTDWorker           
+        logger.info("🔄 Inicializando MetaTrader5 Worker...")
+        mt5_worker = MetaTrader5RTDWorker(None)         
+        if not mt5_worker.initialize_mt5():
+            logger.critical("❌ MetaTrader5 não disponível. O backend será finalizado.")
+            raise RuntimeError("MetaTrader5 não disponível")           
+        if mt5_worker.start() is False:
+            logger.critical("❌ Falha ao iniciar MetaTrader5 Worker. O backend será finalizado.")
+            raise RuntimeError("Falha ao iniciar MetaTrader5 Worker")
+        principais = ["VALE3", "PETR4", "ITUB4", "BBDC4", "ABEV3"]
+        for symbol in principais:
+            mt5_worker.subscribe_ticker("startup", symbol)  # ativa tempo real
 
             app.mt5_worker = mt5_worker
             logger.info("✅ MetaTrader5 Worker em execução")
@@ -96,7 +104,7 @@ def main():
         except Exception as e:
             logger.error(f"❌ Erro inesperado ao configurar MetaTrader5: {e}")
             app.mt5_worker = None
-        
+            
         # Adicionar headers CORS em todas as respostas
         @app.after_request
         def after_request(response):
