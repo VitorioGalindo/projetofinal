@@ -90,8 +90,12 @@ def main():
             app.mt5_worker = mt5_worker
             logger.info("✅ MetaTrader5 Worker em execução")
 
-        except Exception as e:
+        except RuntimeError as e:
             logger.warning(f"⚠️ Erro ao inicializar MetaTrader5: {e}")
+            app.mt5_worker = None
+        except Exception as e:
+            logger.error(f"❌ Erro inesperado ao configurar MetaTrader5: {e}")
+            app.mt5_worker = None
         
         # Adicionar headers CORS em todas as respostas
         @app.after_request
