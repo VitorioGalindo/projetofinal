@@ -42,6 +42,16 @@ class MetaTrader5RTDWorker:
         self.mt5_symbols: Set[str] = set()
         self.realtime_symbols: Set[str] = set()  # Símbolos com ticks em tempo real
         self.failed_symbols: Set[str] = set()    # Símbolos que falharam na ativação
+        self.activation_failures: Dict[str, int] = {}
+
+        # Símbolos principais a serem ativados ao iniciar
+        self.main_symbols: List[str] = [
+            'VALE3', 'PETR4', 'ITUB4', 'BBDC4', 'ABEV3',
+            'MGLU3', 'WEGE3', 'RENT3', 'LREN3'
+        ]
+
+        # Limite para tentativas de ativação de tempo real por símbolo
+        self.MAX_ACTIVATION_RETRIES = 3
 
         # Carrega variáveis do arquivo .env
         load_dotenv()
@@ -121,12 +131,29 @@ class MetaTrader5RTDWorker:
                 logger.info(f"🔄 Sincronizando {len(self.mt5_symbols)} símbolos...")
                 
                 # Ativar tempo real para símbolos principais IMEDIATAMENTE
-                main_symbols = ['VALE3', 'PETR4', 'ITUB4', 'BBDC4', 'ABEV3', 'MGLU3', 'WEGE3', 'RENT3', 'LREN3']
-                
                 logger.info("🚀 ATIVANDO TEMPO REAL PARA SÍMBOLOS PRINCIPAIS...")
-                for symbol in main_symbols:
-                    if symbol in self.mt5_symbols:
-                        self._activate_realtime_for_symbol(symbol)
+                for symbol in list(self.main_symbols):
+                    if symbol not in self.mt5_symbols:
+                        continue
+                    try:
+                        success = self._activate_realtime_for_symbol(symbol)
+                        if not success:
+                            attempts = self.activation_failures.get(symbol, 0) + 1
+                            self.activation_failures[symbol] = attempts
+                            if attempts >= self.MAX_ACTIVATION_RETRIES:
+                                self.main_symbols.remove(symbol)
+                                logger.warning(
+                                    f"{symbol}: removido após {attempts} falhas de ativação"
+                                )
+                    except Exception as e:
+                        attempts = self.activation_failures.get(symbol, 0) + 1
+                        self.activation_failures[symbol] = attempts
+                        logger.error(f"Erro ao ativar tempo real para {symbol}: {e}")
+                        if attempts >= self.MAX_ACTIVATION_RETRIES:
+                            self.main_symbols.remove(symbol)
+                            logger.warning(
+                                f"{symbol}: removido após {attempts} falhas de ativação"
+                            )
                 
                 logger.info(f"✅ Tempo real ativo para: {list(self.realtime_symbols)}")
                 logger.info(f"❌ Falha na ativação: {list(self.failed_symbols)}")
@@ -140,36 +167,19 @@ class MetaTrader5RTDWorker:
     def _activate_realtime_for_symbol(self, symbol: str):
         """Ativa tempo real para um símbolo específico usando market_book_add."""
         try:
-            logger.info(f"🔄 Ativando tempo real para {symbol}...")
-            
-            # Método que funcionou no teste: market_book_add
-            if mt5.market_book_add(symbol):
-                # Verificar se consegue obter tick
+            if mt5.market_book_add(symbol) or mt5.symbol_select(symbol, True):
                 tick = mt5.symbol_info_tick(symbol)
                 if tick and tick.bid > 0:
                     self.realtime_symbols.add(symbol)
-                    logger.info(f"✅ {symbol}: Tempo real ATIVO (Bid: {tick.bid}, Ask: {tick.ask})")
+                    logger.info(f"✅ {symbol}: tempo real ativo")
                     return True
-                else:
-                    logger.warning(f"⚠️ {symbol}: Market book ativo mas tick não disponível")
-            else:
-                logger.warning(f"⚠️ {symbol}: Falha ao ativar market book")
-            
-            # Se market_book_add falhou, tentar symbol_select
-            if mt5.symbol_select(symbol, True):
-                tick = mt5.symbol_info_tick(symbol)
-                if tick and tick.bid > 0:
-                    self.realtime_symbols.add(symbol)
-                    logger.info(f"✅ {symbol}: Tempo real via symbol_select (Bid: {tick.bid})")
-                    return True
-            
             self.failed_symbols.add(symbol)
-            logger.warning(f"❌ {symbol}: Falha na ativação de tempo real")
+            logger.warning(f"❌ {symbol}: falha na ativação de tempo real")
             return False
-            
+
         except Exception as e:
-            logger.error(f"❌ Erro ao ativar tempo real para {symbol}: {e}")
             self.failed_symbols.add(symbol)
+            logger.error(f"❌ {symbol}: erro ao ativar tempo real: {e}")
             return False
 
     # --- Legacy compatibility methods ---
