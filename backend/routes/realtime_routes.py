@@ -23,9 +23,7 @@ def get_realtime_quotes_http():
     if not worker or not worker.mt5_connected:
         return jsonify({'status': 'error', 'message': 'Worker não inicializado'}), 503
 
-    tickers = request.args.getlist('tickers')
-    if not tickers:
-        return jsonify({'status': 'error', 'message': 'Nenhum ticker informado'}), 400
+    tickers = request.args.getlist("tickers") or ["VALE3", "PETR4", "ITUB4"]
 
     quotes = {}
     for t in tickers:
@@ -75,3 +73,4 @@ def register_socketio_events(socketio):
                 worker.unsubscribe_ticker(sid, ticker.upper())
         logger.info(f"Sessão {sid} cancelou subscrição de: {tickers}")
         emit('unsubscription_confirmed', {'tickers': tickers})
+
