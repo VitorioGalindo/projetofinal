@@ -97,30 +97,32 @@ class MetaTrader5RTDWorker:
         """Inicializa conexão com MetaTrader5."""
         if not MT5_AVAILABLE:
             logger.warning("⚠️ MetaTrader5 não disponível")
-            return False
-            
+            raise RuntimeError("MetaTrader5 não disponível")
+
         try:
             # Inicializar MT5
             if not mt5.initialize():
-                logger.error(f"❌ Falha ao inicializar MetaTrader5: {mt5.last_error()}")
-                return False
-            
+
+                logger.error("❌ Falha ao inicializar MetaTrader5")
+                raise RuntimeError("Falha ao inicializar MetaTrader5")
+           
             # Fazer login
             if not mt5.login(self.MT5_LOGIN, password=self.MT5_PASSWORD, server=self.MT5_SERVER):
-                logger.error(f"❌ Falha no login MT5: {mt5.last_error()}")
-                return False
-            
+                error_msg = mt5.last_error()
+                logger.error(f"❌ Falha no login MT5: {error_msg}")
+                raise RuntimeError(f"Falha no login MT5: {error_msg}")
+
             logger.info(f"✅ Login MT5 realizado com sucesso: {self.MT5_LOGIN}")
-            
+
             # Sincronizar símbolos e ativar tempo real
             self._sync_symbols_realtime()
-            
+
             self.mt5_connected = True
             return True
-            
+
         except Exception as e:
             logger.error(f"❌ Erro ao inicializar MT5: {e}")
-            return False
+            raise RuntimeError(f"Erro ao inicializar MT5: {e}")
 
     def _sync_symbols_realtime(self):
         """Sincroniza símbolos e ativa tempo real para principais."""
@@ -355,9 +357,14 @@ class MetaTrader5RTDWorker:
             return True
 
         logger.info("🚀 Iniciando MetaTrader5 RTD Worker TEMPO REAL...")
-        if not self.mt5_connected and not self.initialize_mt5():
-            logger.critical("❌ Falha na inicialização do MT5. O worker não será iniciado.")
-            return False
+
+        try:
+            self.initialize_mt5()
+        except RuntimeError as e:
+            logger.critical(
+                f"❌ Falha na inicialização do MT5. O worker não será iniciado: {e}"
+            )
+            raise  
 
         self.running = True
         self.worker_thread = threading.Thread(target=self._price_update_loop, daemon=True)
