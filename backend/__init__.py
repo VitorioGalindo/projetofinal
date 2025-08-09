@@ -1,7 +1,8 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_socketio import SocketIO
+from sqlalchemy import text
 from .config import Config
 
 db = SQLAlchemy()
@@ -14,6 +15,19 @@ def create_app():
     
     db.init_app(app)
     socketio.init_app(app, cors_allowed_origins="*")
+
+    @app.route("/health")
+    def health_check():
+        return jsonify({"status": "ok"}), 200
+
+    @app.route("/api/health")
+    def api_health_check():
+        try:
+            db.session.execute(text("SELECT 1"))
+            db_status = "connected"
+        except Exception:
+            db_status = "disconnected"
+        return jsonify({"status": "ok", "database": db_status}), 200
 
     with app.app_context():
         # --- REGISTRO DE TODOS OS BLUEPRINTS ---

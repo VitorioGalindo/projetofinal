@@ -84,6 +84,15 @@ npm run dev
 
 O dashboard estará disponível em `http://localhost:3000` e as APIs em `http://localhost:5001/api`.
 
+### Health checks
+
+Verifique rapidamente se o backend está no ar:
+
+```bash
+curl http://localhost:5001/health
+curl http://localhost:5001/api/health
+```
+
 ## Documentação Avançada
 
 Detalhes sobre a integração MetaTrader5 estão em [INTEGRACAO_METATRADER5.md](INTEGRACAO_METATRADER5.md).
