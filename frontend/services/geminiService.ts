@@ -1,6 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 import { CompanyNewsItem } from '../types';
 
+// Retrieve the key from Vite's runtime env to avoid depending on `process.env` in the browser.
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
 
 if (!API_KEY) {

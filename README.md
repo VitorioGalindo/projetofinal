@@ -70,7 +70,7 @@ EOF
 
 Os recursos de inteligência artificial utilizam a API do Google Gemini. Defina `GEMINI_API_KEY` no `.env` do backend e `VITE_GEMINI_API_KEY` no `.env` do frontend.
 
-Caso essa chave não seja fornecida, o sistema continuará funcionando, mas os recursos de IA exibirão avisos e retornarão mensagens de fallback em vez de respostas geradas.
+Caso essa chave não seja fornecida, o sistema continuará funcionando, mas o `geminiService` registrará um `console.warn` e retornará mensagens de fallback em vez de respostas geradas.
 
 ## Executar Testes
 
