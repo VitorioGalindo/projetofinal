@@ -20,8 +20,12 @@ def get_news_by_ticker(ticker):
 @news_bp.route('/latest', methods=['GET'])
 def get_latest_news():
     limit = request.args.get('limit', 10, type=int)
+    portal = request.args.get('portal')
+    query = MarketArticle.query
+    if portal:
+        query = query.filter(MarketArticle.portal == portal)
     articles = (
-        MarketArticle.query
+        query
         .order_by(MarketArticle.data_publicacao.desc())
         .limit(limit)
         .all()
