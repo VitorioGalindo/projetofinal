@@ -101,6 +101,8 @@ Backend (terminal 1):
 ```bash
 python run_backend.py
 ```
+Ao iniciar por esse comando, as migrações do banco de dados são aplicadas automaticamente,
+garantindo que o schema esteja sempre atualizado.
 
 Frontend (terminal 2):
 ```bash
