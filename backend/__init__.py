@@ -43,6 +43,7 @@ def create_app():
         from .routes.screening_routes import screening_bp
         from .routes.search_routes import search_bp
         from .routes.macro_routes import macro_bp
+        from .routes.news_routes import news_bp
 
         app.register_blueprint(companies_bp, url_prefix='/api/companies')
         app.register_blueprint(tickers_bp, url_prefix='/api/tickers')
@@ -57,6 +58,7 @@ def create_app():
         app.register_blueprint(screening_bp, url_prefix='/api/screening')
         app.register_blueprint(search_bp, url_prefix='/api/search')
         app.register_blueprint(macro_bp, url_prefix='/api/macro')
+        app.register_blueprint(news_bp, url_prefix='/api/news')
 
         db.create_all()
 

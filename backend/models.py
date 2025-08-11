@@ -142,6 +142,25 @@ class AssetMetrics(db.Model):
     ticker_info = relationship("Ticker", back_populates="metrics")
 
 
+class MarketArticle(db.Model):
+    __tablename__ = 'artigos_mercado'
+
+    id = db.Column(Integer, primary_key=True)
+    titulo = db.Column(String(255), nullable=False)
+    link_url = db.Column(String(500))
+    portal = db.Column(String(255))
+    resumo = db.Column(Text)
+    conteudo_completo = db.Column(Text)
+    autor = db.Column(String(255))
+    data_publicacao = db.Column(DateTime)
+    categoria = db.Column(String(255))
+    tickers_relacionados = db.Column(Text)
+    score_impacto = db.Column(Numeric(10, 4))
+
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+
 class Portfolio(db.Model):
     __tablename__ = 'portfolios'
 
