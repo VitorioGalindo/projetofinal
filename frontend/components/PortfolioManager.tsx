@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { EditableAsset, DailyMetric } from '../types';
 import { ChevronUpIcon, PencilSquareIcon, TrashIcon, PlusIcon } from '../constants';
+import { upsertPositions } from '../services/portfolioApi';
 
 interface PortfolioManagerProps {
     initialAssets?: EditableAsset[];
@@ -52,6 +53,20 @@ const PortfolioManager: React.FC<PortfolioManagerProps> = ({ initialAssets = [] 
             }
             const newValue = parseFloat((metric.value + amount).toFixed(precision));
             handleMetricChange(id, newValue);
+        }
+    };
+
+    const handleSavePortfolio = async () => {
+        try {
+            await upsertPositions(1, assets.map(a => ({
+                symbol: a.ticker,
+                quantity: a.quantity,
+                avg_price: (a as any).price ?? 0,
+            })));
+            alert('Carteira salva com sucesso!');
+        } catch (error) {
+            console.error(error);
+            alert('Erro ao salvar carteira');
         }
     };
     
@@ -120,7 +135,7 @@ const PortfolioManager: React.FC<PortfolioManagerProps> = ({ initialAssets = [] 
                         <button onClick={handleAddAsset} className="flex items-center gap-1 text-sm text-sky-400 hover:text-sky-300">
                            <PlusIcon className="w-4 h-4" /> Adicionar Ativo
                         </button>
-                        <button onClick={() => console.log('Saving assets:', assets)} className="bg-sky-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-sky-500">
+                        <button onClick={handleSavePortfolio} className="bg-sky-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-sky-500">
                             Salvar Carteira
                         </button>
                     </div>

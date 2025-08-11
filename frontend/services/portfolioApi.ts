@@ -18,6 +18,20 @@ export async function savePortfolioSnapshot(id: number): Promise<void> {
   }
 }
 
+export async function upsertPositions(
+  id: number,
+  positions: { symbol: string; quantity: number; avg_price: number }[],
+): Promise<void> {
+  const res = await fetch(`${API_BASE}/portfolio/${id}/positions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(positions),
+  });
+  if (!res.ok) {
+    throw new Error('Falha ao salvar posições');
+  }
+}
+
 export async function getPortfolioDailyValues(id: number): Promise<PortfolioDailyValue[]> {
   const res = await fetch(`${API_BASE}/portfolio/${id}/daily-values`);
   if (!res.ok) {
@@ -29,6 +43,7 @@ export async function getPortfolioDailyValues(id: number): Promise<PortfolioDail
 export const portfolioApi = {
   getPortfolioSummary,
   savePortfolioSnapshot,
+  upsertPositions,
   getPortfolioDailyValues,
 };
 
