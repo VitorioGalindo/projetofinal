@@ -35,7 +35,12 @@ export const getLatestNews = async (
     headline: item.titulo,
     source: item.portal,
     timestamp: item.data_publicacao,
-    content: item.resumo,
+    summary: item.resumo,
+    content:
+      item.conteudo_completo ||
+      item.conteudo ||
+      item.content ||
+      item.resumo,
     url: item.link_url,
     imageUrl: item.imagem_url || item.image_url,
     tags: item.tags,

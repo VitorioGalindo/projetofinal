@@ -39,8 +39,15 @@ const MarketNews: React.FC = () => {
                 </div>
                 <div className="flex-grow overflow-y-auto pr-1">
                     {newsArticles.map(news => (
-                        <div key={news.id} onClick={() => setSelectedArticle(news)} className={`p-2.5 rounded-md cursor-pointer mb-1 ${selectedArticle?.id === news.id ? 'bg-slate-700' : 'hover:bg-slate-700/50'}`}>
+                        <div
+                            key={news.id}
+                            onClick={() => setSelectedArticle(news)}
+                            className={`p-2.5 rounded-md cursor-pointer mb-1 ${
+                                selectedArticle?.id === news.id ? 'bg-slate-700' : 'hover:bg-slate-700/50'
+                            }`}
+                        >
                             <p className="text-sm font-semibold text-white leading-tight">{news.headline}</p>
+                            <p className="text-xs text-slate-400 mt-1">{news.summary}</p>
                             <div className="flex items-center justify-between mt-1.5">
                                 <span className="text-xs text-slate-400">{news.source.toUpperCase()}</span>
                                 <span className="text-xs text-slate-500">{news.timestamp}</span>
@@ -67,10 +74,16 @@ const MarketNews: React.FC = () => {
                             </button>
                         </div>
                         {selectedArticle.imageUrl && (
-                            <img src={selectedArticle.imageUrl} alt={selectedArticle.headline} className="w-full h-64 object-cover rounded-lg mb-4" />
+                            <img
+                                src={selectedArticle.imageUrl}
+                                alt={selectedArticle.headline}
+                                className="w-full h-64 object-cover rounded-lg mb-4"
+                            />
                         )}
-                        <div className="prose prose-invert prose-sm text-slate-300 max-w-none whitespace-pre-line">
-                            {selectedArticle.content}
+                        <div className="prose prose-invert prose-sm text-slate-300 max-w-none">
+                            <p>{selectedArticle.summary}</p>
+                            <div className="whitespace-pre-line">{selectedArticle.content}</div>
+                            <a href={selectedArticle.url} target="_blank" rel="noopener" className="text-sky-400">Ler no portal</a>
                         </div>
                         {selectedArticle.tags && (
                             <div className="mt-4 flex gap-2">
