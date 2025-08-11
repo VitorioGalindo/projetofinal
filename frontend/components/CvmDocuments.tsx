@@ -68,11 +68,21 @@ const CvmDocuments: React.FC = () => {
 
     useEffect(() => {
         const loadFilters = async () => {
-            const companyData: CvmCompany[] = await cvmService.getCompanies();
-            setCompanies([{ value: '', label: 'Todas' }, ...companyData.map(c => ({ value: String(c.id), label: `${c.ticker} - ${c.company_name}` }))]);
+            try {
+                const companyData: CvmCompany[] = await cvmService.getCompanies();
+                setCompanies([{ value: '', label: 'Todas' }, ...companyData.map(c => ({ value: String(c.id), label: `${c.ticker} - ${c.company_name}` }))]);
+            } catch (e: any) {
+                setCompanies([{ value: '', label: 'Todas' }]);
+                setError(e?.message || 'Erro ao carregar empresas');
+            }
 
-            const docTypes: CvmDocumentType[] = await cvmService.getDocumentTypes();
-            setDocumentTypes([{ value: '', label: 'Todas' }, ...docTypes.map(dt => ({ value: dt.code, label: dt.name }))]);
+            try {
+                const docTypes: CvmDocumentType[] = await cvmService.getDocumentTypes();
+                setDocumentTypes([{ value: '', label: 'Todas' }, ...docTypes.map(dt => ({ value: dt.code, label: dt.name }))]);
+            } catch (e: any) {
+                setDocumentTypes([{ value: '', label: 'Todas' }]);
+                setError(e?.message || 'Erro ao carregar tipos de documento');
+            }
         };
         loadFilters();
     }, []);
