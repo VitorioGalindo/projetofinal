@@ -21,6 +21,7 @@ def test_get_documents_by_company(client):
     data = resp.get_json()
     assert data["success"] is True
     assert len(data["documents"]) == 1
+    assert data["total"] == 1
     assert data["documents"][0]["document_type"] == "DFP"
     assert data["documents"][0]["company_name"] == "Test Co"
 
@@ -46,6 +47,7 @@ def test_get_documents_by_company_filters(client):
     data = resp.get_json()
     assert data["success"] is True
     assert data["documents"] == []
+    assert data["total"] == 0
 
 
 def test_get_documents_by_company_invalid_dates(client):
