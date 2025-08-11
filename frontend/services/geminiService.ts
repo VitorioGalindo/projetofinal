@@ -1,16 +1,21 @@
 import { GoogleGenAI } from "@google/genai";
 import { CompanyNewsItem } from '../types';
 
-const API_KEY = process.env.API_KEY;
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
 
 if (!API_KEY) {
-    throw new Error("API_KEY environment variable not set.");
+    console.warn("GEMINI_API_KEY não definida. Recursos de IA estão desativados.");
 }
 
-const ai = new GoogleGenAI({ apiKey: API_KEY });
+const ai = API_KEY ? new GoogleGenAI({ apiKey: API_KEY }) : null;
 const model = 'gemini-2.5-flash';
 
 const streamFinancialAnalysis = async function* (prompt: string, systemInstruction: string) {
+    if (!ai) {
+        yield "Recurso de IA indisponível. Defina GEMINI_API_KEY para habilitar.";
+        return;
+    }
+
     try {
         const result = await ai.models.generateContentStream({
             model: model,

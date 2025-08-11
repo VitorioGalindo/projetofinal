@@ -47,6 +47,12 @@ cp frontend/.env.example frontend/.env
 ```
 Atualize `frontend/.env` com as URLs da API e a chave do Gemini antes de iniciar o projeto.
 
+### Recursos de IA (Google Gemini)
+
+Os recursos de inteligência artificial utilizam a API do Google Gemini. Defina `GEMINI_API_KEY` no `.env` do backend e `VITE_GEMINI_API_KEY` no `.env` do frontend.
+
+Caso essa chave não seja fornecida, o sistema continuará funcionando, mas os recursos de IA exibirão avisos e retornarão mensagens de fallback em vez de respostas geradas.
+
 ## Executar Testes
 
 Backend:
