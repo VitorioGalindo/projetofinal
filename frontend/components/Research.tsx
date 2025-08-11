@@ -18,6 +18,9 @@ const Research: React.FC = () => {
                     const data: ResearchNote[] = json.notes;
                     setNotes(data);
                     setActiveNoteId(data[0]?.id ?? null);
+                    const { notes } = await res.json();
+                    setNotes(notes);
+                    setActiveNoteId(notes[0]?.id ?? null);
                 }
             } catch (err) {
                 console.error('Failed to load notes', err);

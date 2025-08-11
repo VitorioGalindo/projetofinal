@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { CompanyNewsBlock, CompanyNewsItem } from '../types';
+import { CompanyNewsBlock } from '../types';
 import { geminiService } from '../services/geminiService';
-import { newsService } from '../services/newsService';
+import { companyNewsService } from '../services/companyNewsService';
 import { PlusIcon, MagnifyingGlassIcon, TrashIcon, SparklesIcon } from '../constants';
+
+const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001/api';
 
 const CompanyNews: React.FC = () => {
     const [blocks, setBlocks] = useState<CompanyNewsBlock[]>([]);
@@ -14,10 +16,32 @@ const CompanyNews: React.FC = () => {
     const activeBlock = blocks.find(b => b.ticker === activeBlockTicker);
 
     useEffect(() => {
+        const fetchTickers = async () => {
+            try {
+                const res = await fetch(`${API_BASE}/company-news/tickers`);
+                if (!res.ok) throw new Error('Falha ao buscar tickers');
+                const data = await res.json();
+                const tickers: string[] = data.tickers || data;
+                const blocksData = await Promise.all(
+                    tickers.map(async (t: string) => ({
+                        ticker: t,
+                        newsItems: await companyNewsService.list(t),
+                    }))
+                );
+                setBlocks(blocksData);
+                if (tickers.length > 0) setActiveBlockTicker(tickers[0]);
+            } catch (error) {
+                console.error('Erro ao carregar tickers:', error);
+            }
+        };
+        fetchTickers();
+    }, []);
+
+    useEffect(() => {
         if (!activeBlockTicker) return;
         const fetchNews = async () => {
             try {
-                const newsItems = await newsService.getCompanyNews(activeBlockTicker);
+                const newsItems = await companyNewsService.list(activeBlockTicker);
                 setBlocks(prev =>
                     prev.map(b =>
                         b.ticker === activeBlockTicker ? { ...b, newsItems } : b
@@ -35,7 +59,7 @@ const CompanyNews: React.FC = () => {
         if (ticker && !blocks.find(b => b.ticker.toUpperCase() === ticker.toUpperCase())) {
             const upperTicker = ticker.toUpperCase();
             try {
-                const newsItems = await newsService.getCompanyNews(upperTicker);
+                const newsItems = await companyNewsService.list(upperTicker);
                 const newBlock: CompanyNewsBlock = { ticker: upperTicker, newsItems };
                 setBlocks(prev => [newBlock, ...prev]);
                 setActiveBlockTicker(upperTicker);
@@ -55,15 +79,15 @@ const CompanyNews: React.FC = () => {
         setIsLoading(true);
         try {
             const summaryData = await geminiService.summarizeNewsFromUrl(newsUrl);
-            const newNewsItem: CompanyNewsItem = {
-                id: `news-${Date.now()}`,
+            await companyNewsService.create({
+                ticker: activeBlockTicker,
                 url: newsUrl,
-                ...summaryData
-            };
-            
-            setBlocks(blocks.map(b => 
-                b.ticker === activeBlockTicker 
-                    ? { ...b, newsItems: [newNewsItem, ...b.newsItems] }
+                ...summaryData,
+            });
+            const newsItems = await companyNewsService.list(activeBlockTicker);
+            setBlocks(blocks.map(b =>
+                b.ticker === activeBlockTicker
+                    ? { ...b, newsItems }
                     : b
             ));
             setNewsUrl('');
@@ -75,14 +99,21 @@ const CompanyNews: React.FC = () => {
             setIsLoading(false);
         }
     };
-    
-    const handleDeleteNewsItem = (itemId: string) => {
+
+    const handleDeleteNewsItem = async (itemId: number) => {
         if (!activeBlockTicker) return;
-        setBlocks(blocks.map(b => 
-            b.ticker === activeBlockTicker
-                ? { ...b, newsItems: b.newsItems.filter(item => item.id !== itemId) }
-                : b
-        ));
+        try {
+            await companyNewsService.remove(itemId);
+            const newsItems = await companyNewsService.list(activeBlockTicker);
+            setBlocks(blocks.map(b =>
+                b.ticker === activeBlockTicker
+                    ? { ...b, newsItems }
+                    : b
+            ));
+        } catch (error) {
+            console.error('Erro ao remover notícia:', error);
+            alert('Falha ao remover notícia.');
+        }
     };
 
     const filteredBlocks = blocks.filter(b => b.ticker.toLowerCase().includes(searchTerm.toLowerCase()));

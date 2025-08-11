@@ -494,7 +494,7 @@ export interface ResearchNote {
 
 // Company News Page Types
 export interface CompanyNewsItem {
-  id: string;
+  id: number;
   url: string;
   title: string;
   summary: string;

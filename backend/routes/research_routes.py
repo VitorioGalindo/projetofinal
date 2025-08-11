@@ -34,7 +34,7 @@ def create_note():
     summary = data.get('summary', '')
     content = data.get('content')
     if not title or content is None:
-        return jsonify({'success': False, 'error': 'Campos obrigatórios não fornecidos'}), 400
+           return jsonify({'success': False, 'error': 'Campos obrigatórios não fornecidos'}), 400
     try:
         note = ResearchNote(title=title, summary=summary, content=content)
         db.session.add(note)
