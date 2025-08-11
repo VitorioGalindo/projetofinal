@@ -88,14 +88,15 @@ export interface AiAnalysis {
 }
 
 export interface MarketNewsArticle {
-    id: string;
+    id: number;
     headline: string;
     source: string;
     timestamp: string;
     content: string;
-    imageUrl: string;
-    tags: string[];
-    aiAnalysis: AiAnalysis;
+    url: string;
+    imageUrl?: string;
+    tags?: string[];
+    aiAnalysis?: AiAnalysis;
 }
 
 
