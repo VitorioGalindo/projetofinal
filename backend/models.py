@@ -228,3 +228,34 @@ class ResearchNote(db.Model):
     last_updated = db.Column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+
+
+class CompanyNewsNote(db.Model):
+    __tablename__ = 'company_news_notes'
+
+    id = db.Column(Integer, primary_key=True)
+    ticker = db.Column(String(20), nullable=False, index=True)
+    title = db.Column(String(255), nullable=False)
+    url = db.Column(String(500))
+    source = db.Column(String(255))
+    summary = db.Column(Text)
+    content = db.Column(Text)
+    author = db.Column(String(255))
+    published_at = db.Column(DateTime)
+    created_at = db.Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = db.Column(DateTime(timezone=True), onupdate=func.now())
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'ticker': self.ticker,
+            'title': self.title,
+            'url': self.url,
+            'source': self.source,
+            'summary': self.summary,
+            'content': self.content,
+            'author': self.author,
+            'published_at': self.published_at.isoformat() if self.published_at else None,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
+        }
