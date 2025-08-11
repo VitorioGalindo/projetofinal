@@ -107,3 +107,23 @@ class CompanyRiskFactor(Base):
     mitigation_measures = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
     company = relationship("Company", back_populates="risk_factors")
+
+class MacroIndicator(Base):
+    __tablename__ = 'macro_indicators'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), unique=True, nullable=False)
+    unit = Column(String(20))
+    latest_value = Column(Float)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    history = relationship('MacroIndicatorHistory', back_populates='indicator', cascade='all, delete-orphan')
+
+
+class MacroIndicatorHistory(Base):
+    __tablename__ = 'macro_indicator_history'
+    id = Column(Integer, primary_key=True)
+    indicator_id = Column(Integer, ForeignKey('macro_indicators.id'), nullable=False, index=True)
+    reference_date = Column(DateTime, nullable=False, index=True)
+    value = Column(Float, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    indicator = relationship('MacroIndicator', back_populates='history')
