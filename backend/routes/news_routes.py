@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 from backend.models import MarketArticle
+from textblob import TextBlob
 
 news_bp = Blueprint('news_bp', __name__)
 
@@ -26,3 +27,24 @@ def get_latest_news():
         .all()
     )
     return jsonify([a.to_dict() for a in articles])
+
+
+@news_bp.route('/<int:article_id>/analyze', methods=['POST'])
+def analyze_news_article(article_id):
+    article = MarketArticle.query.get_or_404(article_id)
+    text = article.conteudo_completo or article.resumo or ''
+    blob = TextBlob(text)
+    polarity = blob.sentiment.polarity
+    if polarity > 0.1:
+        sentiment = 'Positivo'
+    elif polarity < -0.1:
+        sentiment = 'Negativo'
+    else:
+        sentiment = 'Neutro'
+
+    return jsonify({
+        'sentiment': sentiment,
+        'summary': text[:200],
+        'mentionedCompanies': [],
+        'relatedNews': []
+    })
