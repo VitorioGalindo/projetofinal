@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from backend.models import CvmDocument, Company
 from backend import db
+from datetime import datetime
 import logging
 
 logger = logging.getLogger(__name__)
@@ -12,12 +13,25 @@ def get_documents_by_company_id(company_id):
     """Retorna os documentos CVM para um ID de empresa específico, usando o modelo correto."""
     try:
         limit = request.args.get('limit', 25, type=int)
-        
+        document_type = request.args.get('document_type')
+        start_date_str = request.args.get('start_date')
+        end_date_str = request.args.get('end_date')
+
         company = db.session.get(Company, company_id)
         if not company:
              return jsonify({"success": False, "message": f"Empresa com ID {company_id} não encontrada"}), 404
 
-        docs = db.session.query(CvmDocument).with_parent(company).order_by(CvmDocument.delivery_date.desc()).limit(limit).all()
+        query = db.session.query(CvmDocument).with_parent(company)
+
+        if document_type:
+            query = query.filter(CvmDocument.document_type == document_type)
+
+        if start_date_str and end_date_str:
+            start_date = datetime.fromisoformat(start_date_str)
+            end_date = datetime.fromisoformat(end_date_str)
+            query = query.filter(CvmDocument.delivery_date.between(start_date, end_date))
+
+        docs = query.order_by(CvmDocument.delivery_date.desc()).limit(limit).all()
 
         if not docs:
             return jsonify({"success": True, "documents": [], "total": 0})
