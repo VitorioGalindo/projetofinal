@@ -154,7 +154,7 @@ class MarketArticle(db.Model):
     autor = db.Column(String(255))
     data_publicacao = db.Column(DateTime)
     categoria = db.Column(String(255))
-    tickers_relacionados = db.Column(Text)
+    tickers_relacionados = db.Column(JSON)
     score_impacto = db.Column(Numeric(10, 4))
 
     def to_dict(self):

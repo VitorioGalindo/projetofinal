@@ -9,7 +9,7 @@ def get_news_by_ticker(ticker):
     ticker_upper = ticker.upper()
     articles = (
         MarketArticle.query
-        .filter(MarketArticle.tickers_relacionados.ilike(f"%{ticker_upper}%"))
+        .filter(MarketArticle.tickers_relacionados.contains([ticker_upper]))
         .order_by(MarketArticle.data_publicacao.desc())
         .all()
     )
