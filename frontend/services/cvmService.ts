@@ -13,7 +13,11 @@ const getDocumentTypes = async (): Promise<CvmDocumentType[]> => {
     const response = await fetch(`${API_BASE_URL}/cvm/document-types`);
     if (!response.ok) throw new Error('Erro ao buscar tipos de documento');
     const data = await response.json();
-    return data.document_types || [];
+    return (data.document_types || []).map((d: any) =>
+        typeof d === 'string'
+            ? { code: d, name: d, description: d }
+            : d
+    );
 };
 
 interface DocumentFilter {
