@@ -1,12 +1,18 @@
 import os
+import sys
 import logging
 from flask_socketio import SocketIO
 from backend import create_app, socketio
 from backend.services.metatrader5_rtd_worker import initialize_rtd_worker
 from backend.routes.realtime_routes import register_socketio_events
 
-# Configurar o logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+if sys.stdout.encoding.lower() != "utf-8":
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+logging.basicConfig(level=logging.INFO, handlers=[handler], force=True)
 logger = logging.getLogger(__name__)
 
 # --- INICIALIZAÇÃO DA APLICAÇÃO ---

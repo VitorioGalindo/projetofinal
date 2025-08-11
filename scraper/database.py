@@ -4,9 +4,15 @@ from sqlalchemy.orm import sessionmaker
 from contextlib import contextmanager
 from scraper.config import DATABASE_URL
 import logging
+import sys
 
-# Configura o logging
-logging.basicConfig(level=logging.INFO)
+if sys.stdout.encoding.lower() != "utf-8":
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+logging.basicConfig(level=logging.INFO, handlers=[handler], force=True)
 logger = logging.getLogger(__name__)
 
 try:

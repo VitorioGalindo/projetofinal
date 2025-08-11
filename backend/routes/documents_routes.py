@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 from backend.models import CvmDocument, Company
 from backend import db
 import logging
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 documents_bp = Blueprint('documents_bp', __name__)
@@ -12,12 +13,25 @@ def get_documents_by_company_id(company_id):
     """Retorna os documentos CVM para um ID de empresa específico, usando o modelo correto."""
     try:
         limit = request.args.get('limit', 25, type=int)
-        
+        doc_type = request.args.get('document_type')
+        start_str = request.args.get('start_date')
+        end_str = request.args.get('end_date')
+
         company = db.session.get(Company, company_id)
         if not company:
-             return jsonify({"success": False, "message": f"Empresa com ID {company_id} não encontrada"}), 404
+            return jsonify({"success": False, "message": f"Empresa com ID {company_id} não encontrada"}), 404
 
-        docs = db.session.query(CvmDocument).with_parent(company).order_by(CvmDocument.delivery_date.desc()).limit(limit).all()
+        query = db.session.query(CvmDocument).filter(CvmDocument.company_id == company_id)
+        if doc_type:
+            query = query.filter(CvmDocument.document_type == doc_type)
+        if start_str:
+            start_date = datetime.strptime(start_str, "%Y-%m-%d")
+            query = query.filter(CvmDocument.delivery_date >= start_date)
+        if end_str:
+            end_date = datetime.strptime(end_str, "%Y-%m-%d")
+            query = query.filter(CvmDocument.delivery_date <= end_date)
+
+        docs = query.order_by(CvmDocument.delivery_date.desc()).limit(limit).all()
 
         if not docs:
             return jsonify({"success": True, "documents": [], "total": 0})
@@ -47,19 +61,34 @@ def get_documents_by_company_id(company_id):
 @cvm_bp.route('/documents', methods=['GET'])
 def list_cvm_documents():
     """Retorna uma lista simplificada de documentos da CVM."""
-    doc_type = request.args.get('document_type')
-    limit = request.args.get('limit', 100, type=int)
-
     try:
+        doc_type = request.args.get('document_type')
+        company_id = request.args.get('company_id', type=int)
+        start_str = request.args.get('start_date')
+        end_str = request.args.get('end_date')
+        limit = request.args.get('limit', 100, type=int)
+
         query = db.session.query(CvmDocument, Company.company_name).join(Company)
         if doc_type:
             query = query.filter(CvmDocument.document_type == doc_type)
+        if company_id:
+            query = query.filter(CvmDocument.company_id == company_id)
+        if start_str:
+            start_date = datetime.strptime(start_str, "%Y-%m-%d")
+            query = query.filter(CvmDocument.delivery_date >= start_date)
+        if end_str:
+            end_date = datetime.strptime(end_str, "%Y-%m-%d")
+            query = query.filter(CvmDocument.delivery_date <= end_date)
+
         docs = query.order_by(CvmDocument.delivery_date.desc()).limit(limit).all()
+
+        if not docs:
+            return jsonify({"success": True, "documents": []})
 
         documents = [
             {
                 "id": doc.id,
-                "company": company_name,
+                "company_name": company_name,
                 "document_type": doc.document_type,
                 "title": doc.title,
                 "delivery_date": doc.delivery_date.isoformat() if doc.delivery_date else None,

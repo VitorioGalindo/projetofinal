@@ -13,15 +13,17 @@ from alembic import command
 from alembic.config import Config
 from backend.services.rtd_worker_integration import integrate_rtd_worker
 
+if sys.stdout.encoding.lower() != "utf-8":
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+logging.basicConfig(level=logging.INFO, handlers=[handler], force=True)
+logger = logging.getLogger(__name__)
+
 # Carregar .env ANTES de tudo
 load_dotenv()
-
-# Configurar logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
 
 def main():
     logger.info("=" * 60)

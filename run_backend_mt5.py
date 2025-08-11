@@ -1,4 +1,5 @@
 import os
+import sys
 import logging
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -8,8 +9,13 @@ from flask_socketio import SocketIO
 from dotenv import load_dotenv
 load_dotenv()  # Carrega variáveis do arquivo .env
 
-# --- Configuração do Logging ---
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+if sys.stdout.encoding.lower() != "utf-8":
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+logging.basicConfig(level=logging.INFO, handlers=[handler], force=True)
 logger = logging.getLogger(__name__)
 
 # --- Factory Function para a Aplicação ---
