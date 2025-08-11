@@ -79,6 +79,23 @@ Os recursos de inteligência artificial utilizam a API do Google Gemini. Defina 
 
 Caso essa chave não seja fornecida, o sistema continuará funcionando, mas o `geminiService` registrará um `console.warn` e retornará mensagens de fallback em vez de respostas geradas.
 
+### Sistema de Logs e Alertas
+
+O backend grava erros em arquivo e pode enviar exceções para serviços externos como o Sentry. As principais variáveis de ambiente são:
+
+```bash
+# Caminho do arquivo de log (padrão: logs/backend.log)
+export LOG_FILE=/caminho/para/backend.log
+
+# Nível de log (padrão: INFO)
+export LOG_LEVEL=DEBUG
+
+# DSN do Sentry para captura de exceções (opcional)
+export SENTRY_DSN=https://exemplo@sentry.io/123
+```
+
+Com `LOG_FILE` definido, todas as exceções — incluindo erros de banco de dados capturados pelo SQLAlchemy — serão registradas no arquivo especificado. Caso `SENTRY_DSN` esteja configurado e o pacote `sentry-sdk` instalado, as exceções também serão enviadas ao Sentry para monitoramento.
+
 ## Executar Testes
 
 Backend:
