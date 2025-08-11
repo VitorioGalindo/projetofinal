@@ -82,16 +82,17 @@ def list_cvm_companies():
     try:
         limit = request.args.get('limit', 100, type=int)
         companies = (
-            db.session.query(Company.cvm_code, Company.company_name)
+            db.session.query(Company.id, Company.ticker, Company.company_name)
+            .filter(Company.ticker.isnot(None))
             .order_by(Company.company_name)
             .limit(limit)
             .all()
         )
         company_list = [
-            {"cvm_code": c.cvm_code, "name": c.company_name}
-            for c in companies if c.cvm_code is not None
+            {"id": c.id, "ticker": c.ticker, "company_name": c.company_name}
+            for c in companies
         ]
-        return jsonify({"success": True, "companies": company_list})
+        return jsonify({"companies": company_list})
     except Exception as e:
         logger.error(f"Erro em list_cvm_companies: {e}")
-        return jsonify({"success": False, "error": "Erro ao listar empresas"}), 500
+        return jsonify({"error": "Erro ao listar empresas"}), 500
