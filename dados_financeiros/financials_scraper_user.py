@@ -11,8 +11,15 @@ from typing import Dict, List, Optional
 from playwright.sync_api import sync_playwright
 import logging
 import numpy as np
+import sys
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+if sys.stdout.encoding.lower() != "utf-8":
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+logging.basicConfig(level=logging.INFO, handlers=[handler], force=True)
 
 def get_cvm_code_as_int(identifier: str) -> Optional[int]:
     if not identifier: return None
