@@ -65,6 +65,7 @@ def main():
             # Testar conexão PostgreSQL
             try:
                 db.session.execute(text('SELECT 1'))
+                db.session.commit()
                 logger.info("✅ PostgreSQL conectado")
 
                 # Contar empresas
