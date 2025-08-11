@@ -2,8 +2,9 @@
 from . import db
 from sqlalchemy.sql import func
 from sqlalchemy import (
-    String, Integer, DateTime, Numeric, Text, Boolean, ForeignKey, Date, JSON
+    String, Integer, DateTime, Numeric, Text, Boolean, ForeignKey, Date
 )
+from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import relationship
 
 # --- Modelo definitivo para a tabela 'companies' ---
