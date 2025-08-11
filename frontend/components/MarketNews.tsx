@@ -11,6 +11,8 @@ const MarketNews: React.FC = () => {
 
     const portals = useMemo(() => Array.from(new Set(newsArticles.map(n => n.source))), [newsArticles]);
 
+    const [limit, setLimit] = useState(50);
+
     const handleSelectArticle = async (article: MarketNewsArticle) => {
         setSelectedArticle(article);
         if (!article.aiAnalysis) {
@@ -28,21 +30,21 @@ const MarketNews: React.FC = () => {
     useEffect(() => {
         (async () => {
             try {
-                const data = await newsService.getLatestNews();
+                const data = await newsService.getLatestNews(limit);
                 setNewsArticles(data);
-                if (data.length > 0) {
+                if (!selectedArticle && data.length > 0) {
                     await handleSelectArticle(data[0]);
                 }
             } catch (err) {
                 console.error('Erro ao carregar notícias', err);
             }
         })();
-    }, []);
+    }, [limit]);
 
     return (
         <div className="flex h-full gap-4 text-slate-300">
             {/* Coluna Esquerda: Feed de Notícias */}
-            <div className="w-1/3 max-w-sm flex flex-col bg-slate-800/50 p-3 rounded-lg border border-slate-700">
+            <div className="w-1/3 max-w-sm flex flex-col h-full bg-slate-800/50 p-3 rounded-lg border border-slate-700">
                 <div className="flex items-center justify-between mb-3 border-b border-slate-700 pb-3">
                     <div className="flex items-center space-x-1">
                         <button onClick={() => setActiveTab('Últimas')} className={`px-3 py-1 text-sm font-semibold rounded-md ${activeTab === 'Últimas' ? 'bg-slate-700 text-white' : 'hover:bg-slate-700/50'}`}>Últimas</button>
@@ -75,7 +77,7 @@ const MarketNews: React.FC = () => {
                                 selectedArticle?.id === news.id ? 'bg-slate-700' : 'hover:bg-slate-700/50'
                             }`}
                         >
-                            <p className="text-sm font-semibold text-white leading-tight">{news.headline}</p>
+                            <p className="text-sm font-semibold text-white leading-tight">{news.title}</p>
                             <p className="text-xs text-slate-400 mt-1">{news.summary}</p>
                             <div className="flex items-center justify-between mt-1.5">
                                 <span className="text-xs text-slate-400">{news.source.toUpperCase()}</span>
@@ -83,6 +85,12 @@ const MarketNews: React.FC = () => {
                             </div>
                         </div>
                     ))}
+                    <button
+                        onClick={() => setLimit(prev => prev + 50)}
+                        className="w-full mt-2 py-1 text-sm text-sky-400 rounded hover:bg-slate-700/50"
+                    >
+                        Carregar mais
+                    </button>
                 </div>
                 <div className="border-t border-slate-700 mt-2 pt-2 text-center text-xs text-slate-500">
                     Finalize seu cadastro para desbloquear notícias exclusivas.
@@ -95,7 +103,7 @@ const MarketNews: React.FC = () => {
                     <>
                         <div className="flex justify-between items-start mb-4">
                             <div>
-                                <h1 className="text-2xl font-bold text-white">{selectedArticle.headline}</h1>
+                                <h1 className="text-2xl font-bold text-white">{selectedArticle.title}</h1>
                                 <p className="text-sm text-slate-400 mt-1">{selectedArticle.timestamp} • {selectedArticle.source}</p>
                             </div>
                             <button onClick={() => setSelectedArticle(newsArticles[0] || null)} className="p-1 text-slate-400 hover:text-white rounded-full hover:bg-slate-700">
@@ -105,7 +113,7 @@ const MarketNews: React.FC = () => {
                         {selectedArticle.imageUrl && (
                             <img
                                 src={selectedArticle.imageUrl}
-                                alt={selectedArticle.headline}
+                                alt={selectedArticle.title}
                                 className="w-full h-64 object-cover rounded-lg mb-4"
                             />
                         )}

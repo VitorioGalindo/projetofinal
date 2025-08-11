@@ -83,7 +83,8 @@ class CvmDocument(db.Model):
     company_id = db.Column(Integer, ForeignKey('companies.id'), nullable=False, index=True)
     cvm_code = db.Column(Integer)
     document_type = db.Column(String(50), index=True)
-    category = db.Column(String(100))
+    # Map 'category' attribute to existing 'document_category' column in database
+    category = db.Column("document_category", String(100))
     title = db.Column(String(255))
     delivery_date = db.Column(DateTime(timezone=True), index=True)
     reference_date = db.Column(Date)

@@ -37,7 +37,7 @@ export const getLatestNews = async (
   const items = (json.news || json.data || json) as any[];
   return items.map((item: any, idx: number) => ({
     id: Number(item.id ?? idx),
-    headline: item.titulo,
+    title: item.titulo,
     source: item.portal,
     timestamp: item.data_publicacao,
     summary: item.resumo,
