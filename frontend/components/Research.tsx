@@ -14,13 +14,11 @@ const Research: React.FC = () => {
             try {
                 const res = await fetch('/api/research/notes');
                 if (res.ok) {
-                    const json = await res.json();
-                    const data: ResearchNote[] = json.notes;
-                    setNotes(data);
-                    setActiveNoteId(data[0]?.id ?? null);
                     const { notes } = await res.json();
                     setNotes(notes);
                     setActiveNoteId(notes[0]?.id ?? null);
+                } else {
+                    console.error('Falha ao carregar notas', await res.text());
                 }
             } catch (err) {
                 console.error('Failed to load notes', err);
