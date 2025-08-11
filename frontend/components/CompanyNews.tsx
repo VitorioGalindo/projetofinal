@@ -1,43 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CompanyNewsBlock, CompanyNewsItem } from '../types';
 import { geminiService } from '../services/geminiService';
+import { newsService } from '../services/newsService';
 import { PlusIcon, MagnifyingGlassIcon, TrashIcon, SparklesIcon } from '../constants';
 
-const mockInitialBlocks: CompanyNewsBlock[] = [
-    {
-        ticker: 'MSFT',
-        newsItems: [
-            {
-                id: 'news-1',
-                url: 'https://www.example.com/msft-earnings',
-                title: 'Microsoft Earnings: Good Quarter From Any Angle',
-                summary: 'A Microsoft divulgou um trimestre sólido, superando as expectativas em todas as frentes. O crescimento da receita de nuvem (Azure) continua a ser o principal impulsionador...',
-                source: 'Morningstar',
-                publishedDate: '2025-04-30T00:00:00Z',
-            }
-        ]
-    },
-    {
-        ticker: 'PETR4',
-        newsItems: []
-    }
-];
-
 const CompanyNews: React.FC = () => {
-    const [blocks, setBlocks] = useState<CompanyNewsBlock[]>(mockInitialBlocks);
-    const [activeBlockTicker, setActiveBlockTicker] = useState<string | null>(mockInitialBlocks[0]?.ticker || null);
+    const [blocks, setBlocks] = useState<CompanyNewsBlock[]>([]);
+    const [activeBlockTicker, setActiveBlockTicker] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [newsUrl, setNewsUrl] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    
+
     const activeBlock = blocks.find(b => b.ticker === activeBlockTicker);
 
-    const handleAddBlock = () => {
+    useEffect(() => {
+        if (!activeBlockTicker) return;
+        const fetchNews = async () => {
+            try {
+                const newsItems = await newsService.getCompanyNews(activeBlockTicker);
+                setBlocks(prev =>
+                    prev.map(b =>
+                        b.ticker === activeBlockTicker ? { ...b, newsItems } : b
+                    )
+                );
+            } catch (error) {
+                console.error('Erro ao recarregar notícias:', error);
+            }
+        };
+        fetchNews();
+    }, [activeBlockTicker]);
+
+    const handleAddBlock = async () => {
         const ticker = prompt("Digite o ticker da nova empresa (ex: PETR4):");
         if (ticker && !blocks.find(b => b.ticker.toUpperCase() === ticker.toUpperCase())) {
-            const newBlock: CompanyNewsBlock = { ticker: ticker.toUpperCase(), newsItems: [] };
-            setBlocks([newBlock, ...blocks]);
-            setActiveBlockTicker(newBlock.ticker);
+            const upperTicker = ticker.toUpperCase();
+            try {
+                const newsItems = await newsService.getCompanyNews(upperTicker);
+                const newBlock: CompanyNewsBlock = { ticker: upperTicker, newsItems };
+                setBlocks(prev => [newBlock, ...prev]);
+                setActiveBlockTicker(upperTicker);
+            } catch (error) {
+                console.error('Erro ao buscar notícias:', error);
+                alert('Falha ao buscar notícias para este ticker.');
+            }
         } else if (ticker) {
             alert("Este ticker já existe.");
         }
