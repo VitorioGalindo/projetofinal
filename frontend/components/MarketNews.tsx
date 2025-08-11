@@ -8,13 +8,27 @@ const MarketNews: React.FC = () => {
     const [newsArticles, setNewsArticles] = useState<MarketNewsArticle[]>([]);
     const [selectedArticle, setSelectedArticle] = useState<MarketNewsArticle | null>(null);
 
+    const handleSelectArticle = async (article: MarketNewsArticle) => {
+        setSelectedArticle(article);
+        if (!article.aiAnalysis) {
+            try {
+                const analysis = await newsService.analyzeNews(article.id);
+                const updated = { ...article, aiAnalysis: analysis };
+                setSelectedArticle(updated);
+                setNewsArticles(prev => prev.map(n => (n.id === article.id ? updated : n)));
+            } catch (err) {
+                console.error('Erro ao analisar notícia', err);
+            }
+        }
+    };
+
     useEffect(() => {
         (async () => {
             try {
                 const data = await newsService.getLatestNews();
                 setNewsArticles(data);
                 if (data.length > 0) {
-                    setSelectedArticle(data[0]);
+                    await handleSelectArticle(data[0]);
                 }
             } catch (err) {
                 console.error('Erro ao carregar notícias', err);
@@ -39,7 +53,7 @@ const MarketNews: React.FC = () => {
                 </div>
                 <div className="flex-grow overflow-y-auto pr-1">
                     {newsArticles.map(news => (
-                        <div key={news.id} onClick={() => setSelectedArticle(news)} className={`p-2.5 rounded-md cursor-pointer mb-1 ${selectedArticle?.id === news.id ? 'bg-slate-700' : 'hover:bg-slate-700/50'}`}>
+                        <div key={news.id} onClick={() => handleSelectArticle(news)} className={`p-2.5 rounded-md cursor-pointer mb-1 ${selectedArticle?.id === news.id ? 'bg-slate-700' : 'hover:bg-slate-700/50'}`}>
                             <p className="text-sm font-semibold text-white leading-tight">{news.headline}</p>
                             <div className="flex items-center justify-between mt-1.5">
                                 <span className="text-xs text-slate-400">{news.source.toUpperCase()}</span>
@@ -124,10 +138,6 @@ const MarketNews: React.FC = () => {
         </div>
     </div>
     </>
-                 ) : selectedArticle ? (
-                    <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-700 text-sm text-slate-400">
-                        Análise por IA indisponível.
-                    </div>
                  ) : null}
             </div>
         </div>
