@@ -17,7 +17,7 @@ export const getCompanyNews = async (
     summary: item.resumo,
     source: item.portal,
     publishedDate: item.data_publicacao,
-    url: item.link_url,
+    url: item.link_url || item.url,
   }));
 };
 
