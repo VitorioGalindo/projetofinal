@@ -1,29 +1,35 @@
-import { MacroIndicator } from '../types';
-
 const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001/api';
 
-interface MacroHistoryPoint {
+interface IndicatorInfo {
+  value: number | null;
+  unit: string;
+  description: string;
+  updated_at: string | null;
+}
+
+interface HistoryPoint {
   date: string;
   value: number;
 }
 
-const getIndicators = async (): Promise<MacroIndicator[]> => {
+async function getIndicators(): Promise<Record<string, IndicatorInfo>> {
   const res = await fetch(`${API_BASE}/macro/indicators`);
   if (!res.ok) {
     throw new Error('Falha ao buscar indicadores macroeconômicos');
   }
-  const data = await res.json();
-  return (data.indicators || data) as MacroIndicator[];
-};
+  const json = await res.json();
+  return json.indicators || {};
+}
 
-const getHistory = async (indicator: string): Promise<MacroHistoryPoint[]> => {
+async function getHistory(indicator: string): Promise<HistoryPoint[]> {
   const res = await fetch(`${API_BASE}/macro/historical/${indicator}`);
   if (!res.ok) {
-    throw new Error('Falha ao buscar histórico macroeconômico');
+    throw new Error('Falha ao buscar histórico do indicador');
   }
-  const data = await res.json();
-  return (data.history || data) as MacroHistoryPoint[];
-};
+  const json = await res.json();
+  return json.history || [];
+}
 
 export const macroService = { getIndicators, getHistory };
+
 
