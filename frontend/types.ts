@@ -293,10 +293,8 @@ export interface CvmDocument {
 
 export interface CvmCompany {
   id: number;
-  cvm_code: number;
-  company_name: string;
   ticker: string;
-  cnpj: string;
+  company_name: string;
 }
 
 export interface CvmDocumentType {
