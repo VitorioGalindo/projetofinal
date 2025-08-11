@@ -30,7 +30,7 @@ const FilterDropdown: React.FC<{ label: string; options: Option[]; value: string
 
 const parseDateRange = (range: string): [string | undefined, string | undefined] => {
     if (!range) return [undefined, undefined];
-    const parts = range.split('–');
+    const parts = range.split(/\s*[–-]\s*/);
     if (parts.length !== 2) return [undefined, undefined];
     const start = parts[0].trim().replace(/\//g, '-');
     const end = parts[1].trim().replace(/\//g, '-');
@@ -42,7 +42,8 @@ const CvmDocuments: React.FC = () => {
     const [documentTypes, setDocumentTypes] = useState<Option[]>([{ value: '', label: 'Todas' }]);
     const [selectedCompany, setSelectedCompany] = useState<string>('');
     const [selectedDocumentType, setSelectedDocumentType] = useState<string>('');
-    const [dateRange, setDateRange] = useState<string>('');
+    const [startDate, setStartDate] = useState<string>('');
+    const [endDate, setEndDate] = useState<string>('');
     const [documents, setDocuments] = useState<CvmDocument[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
@@ -60,15 +61,14 @@ const CvmDocuments: React.FC = () => {
 
     useEffect(() => {
         const fetchDocs = async () => {
-            const [start, end] = parseDateRange(dateRange);
             setLoading(true);
             setError(null);
             try {
                 const docs = await cvmService.getDocuments({
                     companyId: selectedCompany ? Number(selectedCompany) : undefined,
                     documentType: selectedDocumentType || undefined,
-                    startDate: start,
-                    endDate: end,
+                    startDate: startDate || undefined,
+                    endDate: endDate || undefined,
                     limit: 50,
                 });
                 setDocuments(docs);
@@ -79,8 +79,9 @@ const CvmDocuments: React.FC = () => {
                 setLoading(false);
             }
         };
-        fetchDocs();
-    }, [selectedCompany, selectedDocumentType, dateRange]);
+        const handler = setTimeout(fetchDocs, 500);
+        return () => clearTimeout(handler);
+    }, [selectedCompany, selectedDocumentType, startDate, endDate]);
 
     return (
         <div className="bg-slate-800/50 rounded-lg p-6 md:p-8 space-y-6 border border-slate-700">
@@ -106,13 +107,23 @@ const CvmDocuments: React.FC = () => {
                     />
                     <div>
                         <label className="block text-sm font-medium text-slate-400 mb-1">Filtrar por Período de Publicação</label>
-                        <input
-                            type="text"
-                            value={dateRange}
-                            onChange={(e) => setDateRange(e.target.value)}
-                            placeholder="YYYY/MM/DD – YYYY/MM/DD"
-                            className="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                        />
+                        <div className="flex gap-2">
+                            <input
+                                type="date"
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                                placeholder="YYYY-MM-DD"
+                                className="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                            />
+                            <span className="text-slate-400 self-center">até</span>
+                            <input
+                                type="date"
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                                placeholder="YYYY-MM-DD"
+                                className="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                            />
+                        </div>
                     </div>
                 </div>
             </div>

@@ -165,6 +165,8 @@ Resposta:
 }
 ```
 
+No dashboard, o filtro "Período de Publicação" dos Documentos CVM aceita datas no formato `YYYY-MM-DD`. Caso digite manualmente, é possível separar as datas com `-` ou `–` (por exemplo, `2024-01-01 - 2024-01-31`).
+
 ## Documentação Avançada
 
 Detalhes sobre a integração MetaTrader5 estão em [INTEGRACAO_METATRADER5.md](INTEGRACAO_METATRADER5.md).
