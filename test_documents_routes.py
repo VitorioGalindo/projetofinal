@@ -48,22 +48,24 @@ def test_get_documents_by_company_filters(client):
     assert data["documents"] == []
 
 
-def test_get_documents_by_company_invalid_date_range(client):
+def test_get_documents_by_company_invalid_dates(client):
     with client.application.app_context():
-        company = Company(company_name="Range Co", ticker="RNG")
+        company = Company(company_name="Test Co", ticker="TST")
+
         db.session.add(company)
         db.session.commit()
         company_id = company.id
 
     resp = client.get(
-        f"/api/documents/by_company/{company_id}?start_date=2024-02-01&end_date=2024-01-01"
+
+        f"/api/documents/by_company/{company_id}?start_date=2024-13-01"
+
     )
     assert resp.status_code == 400
     data = resp.get_json()
     assert data["success"] is False
-    assert (
-        data["message"] == "Data inicial deve ser menor ou igual à data final"
-    )
+    assert "YYYY-MM-DD" in data["message"]
+
 
 
 def test_get_documents_by_company_handles_exception(client, monkeypatch):

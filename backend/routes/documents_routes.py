@@ -35,14 +35,32 @@ def get_documents_by_company_id(company_id):
         if not company:
             return jsonify({"success": False, "message": f"Empresa com ID {company_id} não encontrada"}), 404
 
-        query = db.session.query(CvmDocument).filter(CvmDocument.company_id == company_id)
+        query = db.session.query(CvmDocument).filter(
+            CvmDocument.company_id == company_id
+        )
         if doc_type:
             query = query.filter(CvmDocument.document_type == doc_type)
-        if start_date:
-            query = query.filter(CvmDocument.delivery_date >= start_date)
-        if end_date:
-            query = query.filter(CvmDocument.delivery_date <= end_date)
 
+
+        if start_str or end_str:
+            try:
+                if start_str:
+                    start_date = datetime.strptime(start_str, "%Y-%m-%d")
+                    query = query.filter(CvmDocument.delivery_date >= start_date)
+                if end_str:
+                    end_date = datetime.strptime(end_str, "%Y-%m-%d")
+                    query = query.filter(CvmDocument.delivery_date <= end_date)
+            except ValueError:
+                return (
+                    jsonify(
+                        {
+                            "success": False,
+                            "message": "Formato de data inválido. Use YYYY-MM-DD.",
+                        }
+                    ),
+                    400,
+                )
+              
         docs = query.order_by(CvmDocument.delivery_date.desc()).limit(limit).all()
 
         if not docs:
