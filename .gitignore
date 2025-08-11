@@ -2,3 +2,4 @@
 **/node_modules/
 # Ignore frontend lockfile generated locally
 frontend/package-lock.json
+package-lock.json

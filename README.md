@@ -31,6 +31,13 @@ playwright install
 npm install
 ```
 
+### Scraper
+```bash
+pip install -r requirements.txt
+cd scraper
+python app.py
+```
+
 ## Variáveis de Ambiente
 
 Crie arquivos `.env` a partir dos modelos de exemplo e preencha com suas credenciais:
@@ -46,6 +53,18 @@ Edite `backend/.env` com as configurações do banco, chave da API do Google Gem
 cp frontend/.env.example frontend/.env
 ```
 Atualize `frontend/.env` com as URLs da API e a chave do Gemini antes de iniciar o projeto.
+
+### Scraper
+Crie um arquivo `.env` na raiz do projeto com as credenciais do banco utilizadas pelo scraper:
+```bash
+cat <<EOF > .env
+DB_USER=seu_usuario
+DB_PASSWORD=sua_senha
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=nome_do_banco
+EOF
+```
 
 ### Recursos de IA (Google Gemini)
 
