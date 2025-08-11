@@ -100,17 +100,17 @@ class MetaTrader5RTDWorker:
             raise RuntimeError("MetaTrader5 não disponível")
 
         try:
-            # Inicializar MT5
-            if not mt5.initialize():
-
-                logger.error("❌ Falha ao inicializar MetaTrader5")
-                raise RuntimeError("Falha ao inicializar MetaTrader5")
-           
-            # Fazer login
-            if not mt5.login(self.MT5_LOGIN, password=self.MT5_PASSWORD, server=self.MT5_SERVER):
-                error_msg = mt5.last_error()
-                logger.error(f"❌ Falha no login MT5: {error_msg}")
-                raise RuntimeError(f"Falha no login MT5: {error_msg}")
+            if not mt5.initialize(
+                login=self.MT5_LOGIN,
+                password=self.MT5_PASSWORD,
+                server=self.MT5_SERVER,
+            ):
+                logger.error(
+                    f"❌ Falha ao inicializar MetaTrader5: {mt5.last_error()}"
+                )
+                raise RuntimeError(
+                    f"Falha ao inicializar MetaTrader5: {mt5.last_error()}"
+                )
 
             logger.info(f"✅ Login MT5 realizado com sucesso: {self.MT5_LOGIN}")
 
