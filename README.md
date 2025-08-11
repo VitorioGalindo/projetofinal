@@ -93,6 +93,23 @@ curl http://localhost:5001/health
 curl http://localhost:5001/api/health
 ```
 
+### Exemplo de rota CVM
+
+Para listar os tipos de documentos disponíveis:
+
+```bash
+curl http://localhost:5001/api/cvm/document-types
+```
+
+Resposta:
+
+```json
+{
+  "success": true,
+  "document_types": ["DFP", "ITR", "..."]
+}
+```
+
 ## Documentação Avançada
 
 Detalhes sobre a integração MetaTrader5 estão em [INTEGRACAO_METATRADER5.md](INTEGRACAO_METATRADER5.md).

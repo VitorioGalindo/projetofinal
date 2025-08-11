@@ -69,8 +69,8 @@ def list_cvm_documents():
 def list_document_types():
     """Retorna tipos de documentos disponíveis."""
     try:
-        types = [r[0] for r in db.session.query(CvmDocument.document_type).distinct().order_by(CvmDocument.document_type)]
-        return jsonify({"success": True, "types": types})
+        document_types = [r[0] for r in db.session.query(CvmDocument.document_type).distinct().order_by(CvmDocument.document_type)]
+        return jsonify({"success": True, "document_types": document_types})
     except Exception as e:
         logger.error(f"Erro em list_document_types: {e}")
         return jsonify({"success": False, "error": "Erro ao listar tipos"}), 500
