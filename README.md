@@ -32,6 +32,10 @@ Após qualquer alteração nos modelos, gere e aplique as migrações:
 flask db migrate -m "mensagem"
 flask db upgrade
 ```
+Para aplicar todas as migrações pendentes diretamente via Alembic:
+```bash
+alembic upgrade head
+```
 
 ### Frontend
 ```bash
