@@ -3,6 +3,7 @@ from backend.models import CvmDocument, Company
 from backend import db
 from datetime import datetime
 import logging
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 documents_bp = Blueprint('documents_bp', __name__)
@@ -61,19 +62,34 @@ def get_documents_by_company_id(company_id):
 @cvm_bp.route('/documents', methods=['GET'])
 def list_cvm_documents():
     """Retorna uma lista simplificada de documentos da CVM."""
-    doc_type = request.args.get('document_type')
-    limit = request.args.get('limit', 100, type=int)
-
     try:
+        doc_type = request.args.get('document_type')
+        company_id = request.args.get('company_id', type=int)
+        start_str = request.args.get('start_date')
+        end_str = request.args.get('end_date')
+        limit = request.args.get('limit', 100, type=int)
+
         query = db.session.query(CvmDocument, Company.company_name).join(Company)
         if doc_type:
             query = query.filter(CvmDocument.document_type == doc_type)
+        if company_id:
+            query = query.filter(CvmDocument.company_id == company_id)
+        if start_str:
+            start_date = datetime.strptime(start_str, "%Y-%m-%d")
+            query = query.filter(CvmDocument.delivery_date >= start_date)
+        if end_str:
+            end_date = datetime.strptime(end_str, "%Y-%m-%d")
+            query = query.filter(CvmDocument.delivery_date <= end_date)
+
         docs = query.order_by(CvmDocument.delivery_date.desc()).limit(limit).all()
+
+        if not docs:
+            return jsonify({"success": True, "documents": []})
 
         documents = [
             {
                 "id": doc.id,
-                "company": company_name,
+                "company_name": company_name,
                 "document_type": doc.document_type,
                 "title": doc.title,
                 "delivery_date": doc.delivery_date.isoformat() if doc.delivery_date else None,
