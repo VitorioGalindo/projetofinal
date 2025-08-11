@@ -57,9 +57,13 @@ def get_documents_by_company_id(company_id):
             query = query.filter(CvmDocument.document_type == doc_type)
 
 
-        if start_date:
+        if start_date and end_date:
+            query = query.filter(
+                CvmDocument.delivery_date.between(start_date, end_date)
+            )
+        elif start_date:
             query = query.filter(CvmDocument.delivery_date >= start_date)
-        if end_date:
+        elif end_date:
             query = query.filter(CvmDocument.delivery_date <= end_date)
               
         docs = query.order_by(CvmDocument.delivery_date.desc()).limit(limit).all()

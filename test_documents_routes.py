@@ -50,6 +50,116 @@ def test_get_documents_by_company_filters(client):
     assert data["total"] == 0
 
 
+def test_get_documents_by_company_start_date_only(client):
+    with client.application.app_context():
+        company = Company(company_name="Date Co", ticker="DCO")
+        db.session.add(company)
+        db.session.commit()
+        company_id = company.id
+        docs = [
+            CvmDocument(
+                company_id=company_id,
+                document_type="DFP",
+                delivery_date=datetime(2024, 1, 1),
+            ),
+            CvmDocument(
+                company_id=company_id,
+                document_type="DFP",
+                delivery_date=datetime(2024, 6, 1),
+            ),
+            CvmDocument(
+                company_id=company_id,
+                document_type="DFP",
+                delivery_date=datetime(2024, 12, 31),
+            ),
+        ]
+        db.session.add_all(docs)
+        db.session.commit()
+
+    resp = client.get(
+        f"/api/documents/by_company/{company_id}?start_date=2024-06-01"
+    )
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert data["success"] is True
+    assert len(data["documents"]) == 2
+    for doc in data["documents"]:
+        assert datetime.fromisoformat(doc["delivery_date"]) >= datetime(2024, 6, 1)
+
+
+def test_get_documents_by_company_end_date_only(client):
+    with client.application.app_context():
+        company = Company(company_name="Date Co", ticker="DCO")
+        db.session.add(company)
+        db.session.commit()
+        company_id = company.id
+        docs = [
+            CvmDocument(
+                company_id=company_id,
+                document_type="DFP",
+                delivery_date=datetime(2024, 1, 1),
+            ),
+            CvmDocument(
+                company_id=company_id,
+                document_type="DFP",
+                delivery_date=datetime(2024, 6, 1),
+            ),
+            CvmDocument(
+                company_id=company_id,
+                document_type="DFP",
+                delivery_date=datetime(2024, 12, 31),
+            ),
+        ]
+        db.session.add_all(docs)
+        db.session.commit()
+
+    resp = client.get(
+        f"/api/documents/by_company/{company_id}?end_date=2024-06-01"
+    )
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert data["success"] is True
+    assert len(data["documents"]) == 2
+    for doc in data["documents"]:
+        assert datetime.fromisoformat(doc["delivery_date"]) <= datetime(2024, 6, 1)
+
+
+def test_get_documents_by_company_between_dates(client):
+    with client.application.app_context():
+        company = Company(company_name="Date Co", ticker="DCO")
+        db.session.add(company)
+        db.session.commit()
+        company_id = company.id
+        docs = [
+            CvmDocument(
+                company_id=company_id,
+                document_type="DFP",
+                delivery_date=datetime(2024, 1, 1),
+            ),
+            CvmDocument(
+                company_id=company_id,
+                document_type="DFP",
+                delivery_date=datetime(2024, 6, 1),
+            ),
+            CvmDocument(
+                company_id=company_id,
+                document_type="DFP",
+                delivery_date=datetime(2024, 12, 31),
+            ),
+        ]
+        db.session.add_all(docs)
+        db.session.commit()
+
+    resp = client.get(
+        f"/api/documents/by_company/{company_id}?start_date=2024-02-01&end_date=2024-11-01"
+    )
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert data["success"] is True
+    assert len(data["documents"]) == 1
+    assert datetime.fromisoformat(data["documents"][0]["delivery_date"]) == datetime(2024, 6, 1)
+
+
 def test_get_documents_by_company_invalid_dates(client):
     with client.application.app_context():
         company = Company(company_name="Test Co", ticker="TST")
