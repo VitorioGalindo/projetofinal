@@ -9,6 +9,7 @@ import sys
 import logging
 from dotenv import load_dotenv
 from sqlalchemy import text
+from backend.services.rtd_worker_integration import integrate_rtd_worker
 
 # Carregar .env ANTES de tudo
 load_dotenv()
@@ -52,10 +53,15 @@ def main():
         
         # Criar aplicação Flask
         app = create_app()
-        
+        socketio, rtd_worker = integrate_rtd_worker(app)
+        if rtd_worker:
+            logger.info("✅ RTD Worker integrado com sucesso")
+        else:
+            logger.warning("⚠️ RTD Worker não inicializado")
+
         # Configurar CORS explicitamente
         from flask_cors import CORS
-        CORS(app, 
+        CORS(app,
              origins=['http://localhost:3000', 'http://127.0.0.1:3000'],
              allow_headers=['Content-Type', 'Authorization'],
              methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'])
@@ -77,32 +83,6 @@ def main():
                 logger.warning(f"⚠️ PostgreSQL não disponível: {e}")
                 logger.info("🔄 Sistema funcionará com fallbacks")
         
-        # Inicializar MetaTrader5 Worker
-        try:
-            from backend.services.metatrader5_rtd_worker import MetaTrader5RTDWorker
-
-            logger.info("🔄 Inicializando MetaTrader5 Worker...")
-            mt5_worker = MetaTrader5RTDWorker(None)
-            if not mt5_worker.initialize_mt5():
-                logger.critical("❌ MetaTrader5 não disponível. O backend será finalizado.")
-                raise RuntimeError("MetaTrader5 não disponível")
-            if mt5_worker.start() is False:
-                logger.critical("❌ Falha ao iniciar MetaTrader5 Worker. O backend será finalizado.")
-                raise RuntimeError("Falha ao iniciar MetaTrader5 Worker")
-            principais = ["VALE3", "PETR4", "ITUB4", "BBDC4", "ABEV3"]
-            for symbol in principais:
-                mt5_worker.subscribe_ticker("startup", symbol)  # ativa tempo real
-
-            app.mt5_worker = mt5_worker
-            logger.info("✅ MetaTrader5 Worker em execução")
-
-        except RuntimeError as e:
-            logger.warning(f"⚠️ Erro ao inicializar MetaTrader5: {e}")
-            app.mt5_worker = None
-        except Exception as e:
-            logger.error(f"❌ Erro inesperado ao configurar MetaTrader5: {e}")
-            app.mt5_worker = None
-            
         # Adicionar headers CORS em todas as respostas
         @app.after_request
         def after_request(response):
@@ -116,14 +96,17 @@ def main():
         logger.info("📊 Health check: http://localhost:5001/health")
         logger.info("🔗 API docs: http://localhost:5001/api/health")
         logger.info("=" * 60)
-        
+
         # Iniciar servidor
-        app.run(
-            host='0.0.0.0',
-            port=5001,
-            debug=True,
-            use_reloader=False  # Evitar problemas com MetaTrader5
-        )
+        if socketio:
+            socketio.run(app, host='0.0.0.0', port=5001)
+        else:
+            app.run(
+                host='0.0.0.0',
+                port=5001,
+                debug=True,
+                use_reloader=False  # Evitar problemas com MetaTrader5
+            )
         
     except Exception as e:
         logger.error(f"❌ Erro ao iniciar aplicação: {e}")
