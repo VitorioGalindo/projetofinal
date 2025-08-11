@@ -35,10 +35,12 @@ const Research: React.FC = () => {
                 body: JSON.stringify({ title: 'Nova Anotação', summary: '', content: '' })
             });
             if (res.ok) {
-                const json = await res.json();
-                const newNote: ResearchNote = json.note;
-                setNotes(prev => [newNote, ...prev]);
-                setActiveNoteId(newNote.id);
+                const { note } = await res.json();
+                setNotes(prev => [note, ...prev]);
+                setActiveNoteId(note.id);
+            } else {
+                console.error('Erro ao criar nota', await res.text());
+                alert('Não foi possível criar a nota. Verifique o backend.');
             }
         } catch (err) {
             console.error('Failed to create note', err);
