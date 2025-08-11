@@ -92,6 +92,7 @@ export interface MarketNewsArticle {
     headline: string;
     source: string;
     timestamp: string;
+    summary: string;
     content: string;
     url: string;
     imageUrl?: string;
