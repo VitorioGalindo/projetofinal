@@ -7,6 +7,7 @@ const MarketNews: React.FC = () => {
     const [activeTab, setActiveTab] = useState('Últimas');
     const [newsArticles, setNewsArticles] = useState<MarketNewsArticle[]>([]);
     const [selectedArticle, setSelectedArticle] = useState<MarketNewsArticle | null>(null);
+    const [limit, setLimit] = useState(50);
 
     const handleSelectArticle = async (article: MarketNewsArticle) => {
         setSelectedArticle(article);
@@ -25,21 +26,21 @@ const MarketNews: React.FC = () => {
     useEffect(() => {
         (async () => {
             try {
-                const data = await newsService.getLatestNews();
+                const data = await newsService.getLatestNews(limit);
                 setNewsArticles(data);
-                if (data.length > 0) {
+                if (!selectedArticle && data.length > 0) {
                     await handleSelectArticle(data[0]);
                 }
             } catch (err) {
                 console.error('Erro ao carregar notícias', err);
             }
         })();
-    }, []);
+    }, [limit]);
 
     return (
         <div className="flex h-full gap-4 text-slate-300">
             {/* Coluna Esquerda: Feed de Notícias */}
-            <div className="w-1/3 max-w-sm flex flex-col bg-slate-800/50 p-3 rounded-lg border border-slate-700">
+            <div className="w-1/3 max-w-sm flex flex-col h-full bg-slate-800/50 p-3 rounded-lg border border-slate-700">
                 <div className="flex items-center justify-between mb-3 border-b border-slate-700 pb-3">
                     <div className="flex items-center space-x-1">
                         <button onClick={() => setActiveTab('Últimas')} className={`px-3 py-1 text-sm font-semibold rounded-md ${activeTab === 'Últimas' ? 'bg-slate-700 text-white' : 'hover:bg-slate-700/50'}`}>Últimas</button>
@@ -68,6 +69,12 @@ const MarketNews: React.FC = () => {
                             </div>
                         </div>
                     ))}
+                    <button
+                        onClick={() => setLimit(prev => prev + 50)}
+                        className="w-full mt-2 py-1 text-sm text-sky-400 rounded hover:bg-slate-700/50"
+                    >
+                        Carregar mais
+                    </button>
                 </div>
                 <div className="border-t border-slate-700 mt-2 pt-2 text-center text-xs text-slate-500">
                     Finalize seu cadastro para desbloquear notícias exclusivas.
