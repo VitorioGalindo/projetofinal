@@ -40,7 +40,7 @@ def get_documents_by_company_id(company_id):
             "documents": doc_list,
         })
     except Exception as e:
-        logger.error(f"Erro em get_documents_by_company_id: {e}")
+        logger.exception(f"Erro em get_documents_by_company_id: {e}")
         return jsonify({"success": False, "error": "Erro interno ao buscar documentos"}), 500
 
 
@@ -68,7 +68,7 @@ def list_cvm_documents():
         ]
         return jsonify({"success": True, "documents": documents})
     except Exception as e:
-        logger.error(f"Erro em list_cvm_documents: {e}")
+        logger.exception(f"Erro em list_cvm_documents: {e}")
         return jsonify({"success": False, "error": "Erro ao listar documentos"}), 500
 
 
@@ -88,7 +88,7 @@ def list_document_types():
         ]
         return jsonify({"success": True, "document_types": document_types})
     except Exception as e:
-        logger.error(f"Erro em list_document_types: {e}")
+        logger.exception(f"Erro em list_document_types: {e}")
         return jsonify({"success": False, "error": "Erro ao listar tipos"}), 500
 
 
@@ -110,5 +110,5 @@ def list_cvm_companies():
         ]
         return jsonify({"companies": company_list})
     except Exception as e:
-        logger.error(f"Erro em list_cvm_companies: {e}")
+        logger.exception(f"Erro em list_cvm_companies: {e}")
         return jsonify({"error": "Erro ao listar empresas"}), 500

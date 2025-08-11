@@ -5,16 +5,62 @@ from flask_socketio import SocketIO
 from flask_migrate import Migrate
 from sqlalchemy import text
 from .config import Config
+import logging
+import os
+
+
+def setup_logging():
+    """Configure logging for the application.
+
+    Creates a file handler and integrates with Sentry (if available).
+    """
+    log_level = os.environ.get("LOG_LEVEL", "INFO").upper()
+    log_file = os.environ.get("LOG_FILE", "logs/backend.log")
+    os.makedirs(os.path.dirname(log_file), exist_ok=True)
+
+    formatter = logging.Formatter(
+        "%(asctime)s [%(levelname)s] %(name)s - %(message)s"
+    )
+
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setLevel(log_level)
+    file_handler.setFormatter(formatter)
+
+    root_logger = logging.getLogger()
+    root_logger.setLevel(log_level)
+    root_logger.addHandler(file_handler)
+
+    # Ensure SQLAlchemy errors are also captured
+    sqlalchemy_logger = logging.getLogger("sqlalchemy")
+    sqlalchemy_logger.setLevel(logging.ERROR)
+
+    sentry_dsn = os.environ.get("SENTRY_DSN")
+    if sentry_dsn:
+        try:
+            import sentry_sdk
+            from sentry_sdk.integrations.flask import FlaskIntegration
+            from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+
+            sentry_sdk.init(
+                dsn=sentry_dsn,
+                integrations=[FlaskIntegration(), SqlalchemyIntegration()],
+            )
+        except ImportError:
+            root_logger.warning(
+                "sentry-sdk não instalado. Ignorando integração com Sentry."
+            )
 
 db = SQLAlchemy()
 socketio = SocketIO()
 migrate = Migrate()
 
 def create_app():
+    setup_logging()
+
     app = Flask(__name__)
     CORS(app, resources={r"/api/*": {"origins": "*"}})
     app.config.from_object(Config)
-    
+
     db.init_app(app)
     migrate.init_app(app, db)
     socketio.init_app(app, cors_allowed_origins="*")
