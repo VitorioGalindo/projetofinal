@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { MarketNewsArticle } from '../types';
 import { StarIcon, CurrencyDollarIcon, XMarkIcon, ArrowRightIcon } from '../constants';
 import { newsService } from '../services/newsService';
@@ -7,6 +7,9 @@ const MarketNews: React.FC = () => {
     const [activeTab, setActiveTab] = useState('Últimas');
     const [newsArticles, setNewsArticles] = useState<MarketNewsArticle[]>([]);
     const [selectedArticle, setSelectedArticle] = useState<MarketNewsArticle | null>(null);
+    const [portalFilter, setPortalFilter] = useState('');
+
+    const portals = useMemo(() => Array.from(new Set(newsArticles.map(n => n.source))), [newsArticles]);
 
     const handleSelectArticle = async (article: MarketNewsArticle) => {
         setSelectedArticle(article);
@@ -50,9 +53,21 @@ const MarketNews: React.FC = () => {
                             <CurrencyDollarIcon /> Cripto
                         </button>
                     </div>
+                    <select
+                        value={portalFilter}
+                        onChange={(e) => setPortalFilter(e.target.value)}
+                        className="bg-slate-800 text-slate-300 text-sm rounded-md border border-slate-700 px-2 py-1"
+                    >
+                        <option value="">Todos</option>
+                        {portals.map(portal => (
+                            <option key={portal} value={portal}>{portal.toUpperCase()}</option>
+                        ))}
+                    </select>
                 </div>
                 <div className="flex-grow overflow-y-auto pr-1">
-                    {newsArticles.map(news => (
+                    {newsArticles
+                        .filter(n => !portalFilter || n.source === portalFilter)
+                        .map(news => (
                         <div
                             key={news.id}
                             onClick={() => setSelectedArticle(news)}

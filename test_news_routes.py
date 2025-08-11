@@ -28,3 +28,16 @@ def test_analyze_news(client):
     data = resp.get_json()
     assert 'sentiment' in data
     assert 'summary' in data
+
+
+def test_get_latest_news_portal_filter(client):
+    with client.application.app_context():
+        db.session.add(MarketArticle(titulo='A', portal='PortalA', tickers_relacionados=[]))
+        db.session.add(MarketArticle(titulo='B', portal='PortalB', tickers_relacionados=[]))
+        db.session.commit()
+
+    resp = client.get('/api/news/latest?portal=PortalA')
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert len(data) == 1
+    assert data[0]['portal'] == 'PortalA'
