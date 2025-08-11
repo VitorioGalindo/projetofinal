@@ -2,53 +2,79 @@ import React, { useState, useEffect } from 'react';
 import { ResearchNote } from '../types';
 import { PlusIcon, MagnifyingGlassIcon, TrashIcon } from '../constants';
 
-const mockNotes: ResearchNote[] = [
-    {
-        id: 'note-1',
-        title: 'Tese de Investimento - PETR4',
-        content: '## Análise da Petrobras (PETR4)\n\n### Pontos Positivos:\n- **Produção do Pré-Sal:** Custos de extração baixos e volumes crescentes.\n- **Política de Dividendos:** Histórico recente de pagamentos robustos aos acionistas.\n- **Redução da Dívida:** A empresa tem focado em desalavancagem, o que reduz o risco financeiro.\n\n### Riscos:\n- **Interferência Política:** Mudanças na diretoria ou na estratégia de preços por influência governamental.\n- **Volatilidade do Petróleo:** A receita é diretamente impactada pelas cotações do barril de petróleo no mercado internacional.\n- **Transição Energética:** A longo prazo, a demanda por combustíveis fósseis pode diminuir.',
-        lastUpdated: '2025-07-28T10:30:00Z',
-    },
-    {
-        id: 'note-2',
-        title: 'Resultados 2T25 - VALE3',
-        content: '## Análise dos Resultados do 2º Trimestre de 2025 da Vale (VALE3)\n\nO resultado veio em linha com as expectativas do mercado. Destaque para o aumento no volume de vendas de minério de ferro, impulsionado pela demanda asiática. A margem EBITDA, no entanto, foi pressionada pelo aumento dos custos com frete marítimo.\n\n- **Receita Líquida:** R$ 50,2 bilhões (+5% vs 2T24)\n- **EBITDA Ajustado:** R$ 22,1 bilhões (-2% vs 2T24)\n- **Lucro Líquido:** R$ 15,8 bilhões (+10% vs 2T24)',
-        lastUpdated: '2025-07-25T15:00:00Z',
-    },
-];
-
 const Research: React.FC = () => {
-    const [notes, setNotes] = useState<ResearchNote[]>(mockNotes);
-    const [activeNoteId, setActiveNoteId] = useState<string | null>(mockNotes[0]?.id || null);
+    const [notes, setNotes] = useState<ResearchNote[]>([]);
+    const [activeNoteId, setActiveNoteId] = useState<number | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
 
     const activeNote = notes.find(note => note.id === activeNoteId);
 
-    const handleNewNote = () => {
-        const newNote: ResearchNote = {
-            id: `note-${Date.now()}`,
-            title: 'Nova Anotação',
-            content: '',
-            lastUpdated: new Date().toISOString(),
+    useEffect(() => {
+        const loadNotes = async () => {
+            try {
+                const res = await fetch('/api/research/notes');
+                if (res.ok) {
+                    const data: ResearchNote[] = await res.json();
+                    setNotes(data);
+                    setActiveNoteId(data[0]?.id ?? null);
+                }
+            } catch (err) {
+                console.error('Failed to load notes', err);
+            }
         };
-        setNotes([newNote, ...notes]);
-        setActiveNoteId(newNote.id);
-    };
+        loadNotes();
+    }, []);
 
-    const handleDeleteNote = (noteId: string) => {
-        setNotes(notes.filter(note => note.id !== noteId));
-        if (activeNoteId === noteId) {
-            setActiveNoteId(notes.length > 1 ? notes.filter(n => n.id !== noteId)[0].id : null);
+    const handleNewNote = async () => {
+        try {
+            const res = await fetch('/api/research/notes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title: 'Nova Anotação', content: '' })
+            });
+            if (res.ok) {
+                const newNote: ResearchNote = await res.json();
+                setNotes(prev => [newNote, ...prev]);
+                setActiveNoteId(newNote.id);
+            }
+        } catch (err) {
+            console.error('Failed to create note', err);
         }
     };
-    
+
+    const handleDeleteNote = async (noteId: number) => {
+        try {
+            await fetch(`/api/research/notes/${noteId}`, { method: 'DELETE' });
+            setNotes(prevNotes => {
+                const remaining = prevNotes.filter(note => note.id !== noteId);
+                if (activeNoteId === noteId) {
+                    setActiveNoteId(remaining[0]?.id ?? null);
+                }
+                return remaining;
+            });
+        } catch (err) {
+            console.error('Failed to delete note', err);
+        }
+    };
+
     const handleUpdateNote = (field: 'title' | 'content', value: string) => {
         if (!activeNoteId) return;
-        setNotes(notes.map(note => 
-            note.id === activeNoteId 
-                ? { ...note, [field]: value, lastUpdated: new Date().toISOString() }
-                : note
-        ));
+        setNotes(prevNotes => {
+            const updated = prevNotes.map(note =>
+                note.id === activeNoteId
+                    ? { ...note, [field]: value, last_updated: new Date().toISOString() }
+                    : note
+            );
+            const noteToUpdate = updated.find(n => n.id === activeNoteId);
+            if (noteToUpdate) {
+                fetch(`/api/research/notes/${activeNoteId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(noteToUpdate)
+                }).catch(err => console.error('Failed to update note', err));
+            }
+            return updated;
+        });
     };
 
     const filteredNotes = notes.filter(note => 
@@ -96,7 +122,7 @@ const Research: React.FC = () => {
                             <p className="text-sm text-slate-400 truncate mt-1">
                                 {note.content.split('\n')[0] || 'Nenhum conteúdo adicional'}
                             </p>
-                            <p className="text-xs text-slate-500 mt-2">{formatDate(note.lastUpdated)}</p>
+                            <p className="text-xs text-slate-500 mt-2">{formatDate(note.last_updated)}</p>
                         </div>
                     ))}
                 </div>
@@ -107,7 +133,7 @@ const Research: React.FC = () => {
                 {activeNote ? (
                     <>
                         <div className="p-4 border-b border-slate-700 flex justify-between items-center">
-                            <p className="text-sm text-slate-400">Última atualização: {formatDate(activeNote.lastUpdated)}</p>
+                            <p className="text-sm text-slate-400">Última atualização: {formatDate(activeNote.last_updated)}</p>
                             <button onClick={() => handleDeleteNote(activeNote.id)} className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-700 rounded-full">
                                 <TrashIcon className="w-5 h-5" />
                             </button>
