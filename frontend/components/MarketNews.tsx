@@ -60,7 +60,7 @@ const MarketNews: React.FC = () => {
                                 selectedArticle?.id === news.id ? 'bg-slate-700' : 'hover:bg-slate-700/50'
                             }`}
                         >
-                            <p className="text-sm font-semibold text-white leading-tight">{news.headline}</p>
+                            <p className="text-sm font-semibold text-white leading-tight">{news.title}</p>
                             <p className="text-xs text-slate-400 mt-1">{news.summary}</p>
                             <div className="flex items-center justify-between mt-1.5">
                                 <span className="text-xs text-slate-400">{news.source.toUpperCase()}</span>
@@ -80,7 +80,7 @@ const MarketNews: React.FC = () => {
                     <>
                         <div className="flex justify-between items-start mb-4">
                             <div>
-                                <h1 className="text-2xl font-bold text-white">{selectedArticle.headline}</h1>
+                                <h1 className="text-2xl font-bold text-white">{selectedArticle.title}</h1>
                                 <p className="text-sm text-slate-400 mt-1">{selectedArticle.timestamp} • {selectedArticle.source}</p>
                             </div>
                             <button onClick={() => setSelectedArticle(newsArticles[0] || null)} className="p-1 text-slate-400 hover:text-white rounded-full hover:bg-slate-700">
@@ -90,7 +90,7 @@ const MarketNews: React.FC = () => {
                         {selectedArticle.imageUrl && (
                             <img
                                 src={selectedArticle.imageUrl}
-                                alt={selectedArticle.headline}
+                                alt={selectedArticle.title}
                                 className="w-full h-64 object-cover rounded-lg mb-4"
                             />
                         )}
