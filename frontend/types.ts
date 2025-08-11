@@ -485,10 +485,10 @@ export interface StockGuideData {
 
 // Research Page Types
 export interface ResearchNote {
-    id: string;
+    id: number;
     title: string;
     content: string;
-    lastUpdated: string;
+    last_updated: string;
 }
 
 // Company News Page Types
