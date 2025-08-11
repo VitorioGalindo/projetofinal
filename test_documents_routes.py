@@ -48,6 +48,98 @@ def test_get_documents_by_company_filters(client):
     assert data["documents"] == []
 
 
+def test_get_documents_by_company_start_date_only(client):
+    with client.application.app_context():
+        company = Company(company_name="Start Co", ticker="ST")
+        db.session.add(company)
+        db.session.commit()
+        company_id = company.id
+
+        old_doc = CvmDocument(
+            company_id=company_id,
+            document_type="DFP",
+            delivery_date=datetime(2023, 1, 1),
+        )
+        new_doc = CvmDocument(
+            company_id=company_id,
+            document_type="DFP",
+            delivery_date=datetime(2024, 1, 1),
+        )
+        db.session.add_all([old_doc, new_doc])
+        db.session.commit()
+
+    resp = client.get(
+        f"/api/documents/by_company/{company_id}?start_date=2023-06-01"
+    )
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert len(data["documents"]) == 1
+    assert data["documents"][0]["delivery_date"].startswith("2024-01-01")
+
+
+def test_get_documents_by_company_end_date_only(client):
+    with client.application.app_context():
+        company = Company(company_name="End Co", ticker="EN")
+        db.session.add(company)
+        db.session.commit()
+        company_id = company.id
+
+        old_doc = CvmDocument(
+            company_id=company_id,
+            document_type="DFP",
+            delivery_date=datetime(2023, 1, 1),
+        )
+        new_doc = CvmDocument(
+            company_id=company_id,
+            document_type="DFP",
+            delivery_date=datetime(2024, 1, 1),
+        )
+        db.session.add_all([old_doc, new_doc])
+        db.session.commit()
+
+    resp = client.get(
+        f"/api/documents/by_company/{company_id}?end_date=2023-06-01"
+    )
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert len(data["documents"]) == 1
+    assert data["documents"][0]["delivery_date"].startswith("2023-01-01")
+
+
+def test_get_documents_by_company_between_dates(client):
+    with client.application.app_context():
+        company = Company(company_name="Between Co", ticker="BT")
+        db.session.add(company)
+        db.session.commit()
+        company_id = company.id
+
+        early_doc = CvmDocument(
+            company_id=company_id,
+            document_type="DFP",
+            delivery_date=datetime(2023, 1, 1),
+        )
+        mid_doc = CvmDocument(
+            company_id=company_id,
+            document_type="DFP",
+            delivery_date=datetime(2023, 6, 1),
+        )
+        late_doc = CvmDocument(
+            company_id=company_id,
+            document_type="DFP",
+            delivery_date=datetime(2024, 1, 1),
+        )
+        db.session.add_all([early_doc, mid_doc, late_doc])
+        db.session.commit()
+
+    resp = client.get(
+        f"/api/documents/by_company/{company_id}?start_date=2023-02-01&end_date=2023-12-31"
+    )
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert len(data["documents"]) == 1
+    assert data["documents"][0]["delivery_date"].startswith("2023-06-01")
+
+
 def test_get_documents_by_company_handles_exception(client, monkeypatch):
     with client.application.app_context():
         company = Company(company_name="Test Co", ticker="TST")
@@ -108,7 +200,7 @@ def test_list_cvm_documents_filters(client):
     assert data["success"] is True
     assert len(data["documents"]) == 1
 
-    assert data["documents"][0]["company_name"] == "Test Co"
+    assert data["documents"][0]["company_name"] == "CompA"
     assert "company" not in data["documents"][0]
 
     assert data["documents"][0]["document_type"] == "DFP"

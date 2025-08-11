@@ -24,10 +24,15 @@ def get_documents_by_company_id(company_id):
         query = db.session.query(CvmDocument).filter(CvmDocument.company_id == company_id)
         if doc_type:
             query = query.filter(CvmDocument.document_type == doc_type)
-        if start_str:
+
+        if start_str and end_str:
+            start_date = datetime.strptime(start_str, "%Y-%m-%d")
+            end_date = datetime.strptime(end_str, "%Y-%m-%d")
+            query = query.filter(CvmDocument.delivery_date.between(start_date, end_date))
+        elif start_str:
             start_date = datetime.strptime(start_str, "%Y-%m-%d")
             query = query.filter(CvmDocument.delivery_date >= start_date)
-        if end_str:
+        elif end_str:
             end_date = datetime.strptime(end_str, "%Y-%m-%d")
             query = query.filter(CvmDocument.delivery_date <= end_date)
 
@@ -73,10 +78,14 @@ def list_cvm_documents():
             query = query.filter(CvmDocument.document_type == doc_type)
         if company_id:
             query = query.filter(CvmDocument.company_id == company_id)
-        if start_str:
+        if start_str and end_str:
+            start_date = datetime.strptime(start_str, "%Y-%m-%d")
+            end_date = datetime.strptime(end_str, "%Y-%m-%d")
+            query = query.filter(CvmDocument.delivery_date.between(start_date, end_date))
+        elif start_str:
             start_date = datetime.strptime(start_str, "%Y-%m-%d")
             query = query.filter(CvmDocument.delivery_date >= start_date)
-        if end_str:
+        elif end_str:
             end_date = datetime.strptime(end_str, "%Y-%m-%d")
             query = query.filter(CvmDocument.delivery_date <= end_date)
 
