@@ -14,9 +14,10 @@ def get_macro_indicators():
     """Retorna os indicadores macroeconômicos do Brasil a partir do banco de dados."""
     try:
         requested = [i.upper() for i in request.args.getlist('indicators')]
-        rows = db.session.execute(
+        result = db.session.execute(
             text("SELECT indicator, value, unit, description, updated_at FROM macro_indicators")
-        ).fetchall()
+        )
+        rows = result.fetchall() if hasattr(result, "fetchall") else result
         data = {}
         for row in rows:
             if not requested or row.indicator in requested:

@@ -1,5 +1,5 @@
 import pytest
-from backend import create_app
+from backend import create_app, db
 from backend.config import Config
 
 
@@ -9,4 +9,6 @@ def client():
     app = create_app()
     app.config["TESTING"] = True
     with app.test_client() as client:
+        with app.app_context():
+            db.create_all()
         yield client
