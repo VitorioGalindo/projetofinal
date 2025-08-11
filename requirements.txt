@@ -12,6 +12,7 @@ python-socketio>=5.8
 # Banco de Dados e ORM
 SQLAlchemy>=2.0
 psycopg2-binary>=2.9
+alembic>=1.13
 
 # Coleta e Processamento de Dados
 requests>=2.31
