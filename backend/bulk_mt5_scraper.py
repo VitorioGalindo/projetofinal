@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import pandas as pd
 import MetaTrader5 as mt5
@@ -7,8 +8,13 @@ from dotenv import load_dotenv
 from tqdm import tqdm
 import logging
 
-# --- 1. CONFIGURAÇÃO ---
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+if sys.stdout.encoding.lower() != "utf-8":
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+logging.basicConfig(level=logging.INFO, handlers=[handler], force=True)
 load_dotenv()
 
 def get_db_engine():
