@@ -2,11 +2,13 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_socketio import SocketIO
+from flask_migrate import Migrate
 from sqlalchemy import text
 from .config import Config
 
 db = SQLAlchemy()
 socketio = SocketIO()
+migrate = Migrate()
 
 def create_app():
     app = Flask(__name__)
@@ -14,6 +16,7 @@ def create_app():
     app.config.from_object(Config)
     
     db.init_app(app)
+    migrate.init_app(app, db)
     socketio.init_app(app, cors_allowed_origins="*")
 
     @app.route("/health")
@@ -65,7 +68,5 @@ def create_app():
         app.register_blueprint(research_bp, url_prefix='/api/research')
         app.register_blueprint(company_news_bp, url_prefix='/api/company-news')
 
-
-        db.create_all()
 
     return app

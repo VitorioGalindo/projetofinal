@@ -18,12 +18,19 @@ Dependências opcionais:
   ```
 - **Desenvolvimento e testes**
   ```bash
-  pip install -r requirements-dev.txt
-  ```
+pip install -r requirements-dev.txt
+```
 
 Após a instalação, execute:
 ```bash
 playwright install
+```
+
+### Migrações de Banco de Dados
+Após qualquer alteração nos modelos, gere e aplique as migrações:
+```bash
+flask db migrate -m "mensagem"
+flask db upgrade
 ```
 
 ### Frontend
