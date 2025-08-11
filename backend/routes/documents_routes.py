@@ -63,9 +63,10 @@ def get_documents_by_company_id(company_id):
             query = query.filter(CvmDocument.delivery_date <= end_date)
               
         docs = query.order_by(CvmDocument.delivery_date.desc()).limit(limit).all()
+        total = len(docs)
 
         if not docs:
-            return jsonify({"success": True, "documents": [], "total": 0})
+            return jsonify({"success": True, "documents": [], "total": total})
 
         doc_list = [{
             "id": doc.id,
@@ -83,6 +84,7 @@ def get_documents_by_company_id(company_id):
             "company_name": company.company_name,
             "ticker": company.ticker,
             "documents": doc_list,
+            "total": total,
         })
     except Exception as e:
         logger.exception(f"Erro em get_documents_by_company_id: {e}")
