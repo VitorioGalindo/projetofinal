@@ -14,3 +14,17 @@ def test_get_news_by_ticker(client):
     data = resp.get_json()
     assert len(data) == 1
     assert data[0]['titulo'] == 'Match'
+
+
+def test_analyze_news(client):
+    with client.application.app_context():
+        article = MarketArticle(titulo='Test', resumo='Boa notícia', tickers_relacionados=[])
+        db.session.add(article)
+        db.session.commit()
+        art_id = article.id
+
+    resp = client.post(f'/api/news/{art_id}/analyze')
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert 'sentiment' in data
+    assert 'summary' in data

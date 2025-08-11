@@ -44,5 +44,17 @@ export const getLatestNews = async (
   }));
 };
 
-export const newsService = { getCompanyNews, getLatestNews };
+export const analyzeNews = async (
+  id: number
+): Promise<any> => {
+  const res = await fetch(`${API_BASE}/news/${id}/analyze`, {
+    method: 'POST',
+  });
+  if (!res.ok) {
+    throw new Error('Falha ao analisar notícia');
+  }
+  return res.json();
+};
+
+export const newsService = { getCompanyNews, getLatestNews, analyzeNews };
 
