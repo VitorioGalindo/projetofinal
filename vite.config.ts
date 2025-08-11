@@ -12,7 +12,7 @@ export default defineConfig(() => {
         port: 5173, // Define a porta do frontend explicitamente
         proxy: {
           '/api': {
-            target: 'http://127.0.0.1:5000',
+            target: 'http://127.0.0.1:5001',
             changeOrigin: true,
             secure: false, // Frequentemente ajuda a resolver problemas de proxy
             // Adiciona logs para depurar o que o proxy está fazendo
