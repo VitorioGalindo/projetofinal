@@ -24,14 +24,21 @@ def get_documents_by_company_id(company_id):
 
         doc_list = [{
             "id": doc.id,
+            "company_name": company.company_name,
+            "ticker": company.ticker,
             "document_type": doc.document_type,
             "category": doc.category,
             "title": doc.title,
             "delivery_date": doc.delivery_date.isoformat() if doc.delivery_date else None,
             "download_url": doc.download_url
         } for doc in docs]
-        
-        return jsonify({"success": True, "company_name": company.company_name, "documents": doc_list})
+
+        return jsonify({
+            "success": True,
+            "company_name": company.company_name,
+            "ticker": company.ticker,
+            "documents": doc_list,
+        })
     except Exception as e:
         logger.error(f"Erro em get_documents_by_company_id: {e}")
         return jsonify({"success": False, "error": "Erro interno ao buscar documentos"}), 500
