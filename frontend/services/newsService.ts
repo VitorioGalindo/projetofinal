@@ -9,8 +9,8 @@ const getCompanyNews = async (ticker: string): Promise<CompanyNewsItem[]> => {
   }
   const json = await res.json();
   const items = (json.news || json.data || json) as any[];
-  return items.map((item: any) => ({
-    id: String(item.id ?? crypto.randomUUID()),
+  return items.map((item: any, idx: number) => ({
+    id: Number(item.id ?? Date.now() + idx),
     title: item.titulo,
     summary: item.resumo,
     source: item.portal,
