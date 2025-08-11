@@ -2,8 +2,9 @@
 from . import db
 from sqlalchemy.sql import func
 from sqlalchemy import (
-    String, Integer, DateTime, Numeric, Text, Boolean, ForeignKey, Date, JSON
+    String, Integer, DateTime, Numeric, Text, Boolean, ForeignKey, Date
 )
+from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import relationship
 
 # --- Modelo definitivo para a tabela 'companies' ---
@@ -140,6 +141,36 @@ class AssetMetrics(db.Model):
     updated_at = db.Column(DateTime(timezone=True), onupdate=func.now())
 
     ticker_info = relationship("Ticker", back_populates="metrics")
+
+
+class MacroIndicator(db.Model):
+    __tablename__ = 'macro_indicators'
+
+    indicator = db.Column(String(100), primary_key=True)
+    value = db.Column(Numeric)
+    unit = db.Column(String(50))
+    description = db.Column(Text)
+    updated_at = db.Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    history = relationship(
+        "MacroIndicatorHistory",
+        back_populates="indicator_ref",
+        cascade="all, delete-orphan",
+    )
+
+
+class MacroIndicatorHistory(db.Model):
+    __tablename__ = 'macro_indicator_history'
+
+    indicator = db.Column(
+        String(100),
+        ForeignKey('macro_indicators.indicator'),
+        primary_key=True,
+    )
+    date = db.Column(Date, primary_key=True)
+    value = db.Column(Numeric)
+
+    indicator_ref = relationship("MacroIndicator", back_populates="history")
 
 
 class MarketArticle(db.Model):
