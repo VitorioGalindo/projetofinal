@@ -17,6 +17,20 @@ def get_documents_by_company_id(company_id):
         start_str = request.args.get('start_date')
         end_str = request.args.get('end_date')
 
+        start_date = datetime.strptime(start_str, "%Y-%m-%d") if start_str else None
+        end_date = datetime.strptime(end_str, "%Y-%m-%d") if end_str else None
+
+        if start_date and end_date and start_date > end_date:
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": "Data inicial deve ser menor ou igual à data final",
+                    }
+                ),
+                400,
+            )
+
         company = db.session.get(Company, company_id)
         if not company:
             return jsonify({"success": False, "message": f"Empresa com ID {company_id} não encontrada"}), 404
@@ -26,6 +40,7 @@ def get_documents_by_company_id(company_id):
         )
         if doc_type:
             query = query.filter(CvmDocument.document_type == doc_type)
+
 
         if start_str or end_str:
             try:
@@ -45,7 +60,7 @@ def get_documents_by_company_id(company_id):
                     ),
                     400,
                 )
-
+              
         docs = query.order_by(CvmDocument.delivery_date.desc()).limit(limit).all()
 
         if not docs:
