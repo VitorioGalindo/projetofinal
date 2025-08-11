@@ -17,8 +17,23 @@ def get_documents_by_company_id(company_id):
         start_str = request.args.get('start_date')
         end_str = request.args.get('end_date')
 
-        start_date = datetime.strptime(start_str, "%Y-%m-%d") if start_str else None
-        end_date = datetime.strptime(end_str, "%Y-%m-%d") if end_str else None
+        start_date = end_date = None
+        if start_str or end_str:
+            try:
+                if start_str:
+                    start_date = datetime.strptime(start_str, "%Y-%m-%d")
+                if end_str:
+                    end_date = datetime.strptime(end_str, "%Y-%m-%d")
+            except ValueError:
+                return (
+                    jsonify(
+                        {
+                            "success": False,
+                            "message": "Formato de data inválido. Use YYYY-MM-DD.",
+                        }
+                    ),
+                    400,
+                )
 
         if start_date and end_date and start_date > end_date:
             return (
@@ -42,24 +57,10 @@ def get_documents_by_company_id(company_id):
             query = query.filter(CvmDocument.document_type == doc_type)
 
 
-        if start_str or end_str:
-            try:
-                if start_str:
-                    start_date = datetime.strptime(start_str, "%Y-%m-%d")
-                    query = query.filter(CvmDocument.delivery_date >= start_date)
-                if end_str:
-                    end_date = datetime.strptime(end_str, "%Y-%m-%d")
-                    query = query.filter(CvmDocument.delivery_date <= end_date)
-            except ValueError:
-                return (
-                    jsonify(
-                        {
-                            "success": False,
-                            "message": "Formato de data inválido. Use YYYY-MM-DD.",
-                        }
-                    ),
-                    400,
-                )
+        if start_date:
+            query = query.filter(CvmDocument.delivery_date >= start_date)
+        if end_date:
+            query = query.filter(CvmDocument.delivery_date <= end_date)
               
         docs = query.order_by(CvmDocument.delivery_date.desc()).limit(limit).all()
 
@@ -104,10 +105,32 @@ def list_cvm_documents():
         if company_id:
             query = query.filter(CvmDocument.company_id == company_id)
         if start_str:
-            start_date = datetime.strptime(start_str, "%Y-%m-%d")
+            try:
+                start_date = datetime.strptime(start_str, "%Y-%m-%d")
+            except ValueError:
+                return (
+                    jsonify(
+                        {
+                            "success": False,
+                            "message": "Formato de data inválido. Use YYYY-MM-DD.",
+                        }
+                    ),
+                    400,
+                )
             query = query.filter(CvmDocument.delivery_date >= start_date)
         if end_str:
-            end_date = datetime.strptime(end_str, "%Y-%m-%d")
+            try:
+                end_date = datetime.strptime(end_str, "%Y-%m-%d")
+            except ValueError:
+                return (
+                    jsonify(
+                        {
+                            "success": False,
+                            "message": "Formato de data inválido. Use YYYY-MM-DD.",
+                        }
+                    ),
+                    400,
+                )
             query = query.filter(CvmDocument.delivery_date <= end_date)
 
         docs = query.order_by(CvmDocument.delivery_date.desc()).limit(limit).all()
