@@ -77,7 +77,7 @@ const MacroData: React.FC = () => {
                         dot={false}
                     />
                 ))}
-            </LineChart>
+            </LineChart>        
         </ResponsiveContainer>
       </div>
     </div>
