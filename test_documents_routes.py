@@ -48,6 +48,24 @@ def test_get_documents_by_company_filters(client):
     assert data["documents"] == []
 
 
+def test_get_documents_by_company_invalid_date_range(client):
+    with client.application.app_context():
+        company = Company(company_name="Range Co", ticker="RNG")
+        db.session.add(company)
+        db.session.commit()
+        company_id = company.id
+
+    resp = client.get(
+        f"/api/documents/by_company/{company_id}?start_date=2024-02-01&end_date=2024-01-01"
+    )
+    assert resp.status_code == 400
+    data = resp.get_json()
+    assert data["success"] is False
+    assert (
+        data["message"] == "Data inicial deve ser menor ou igual à data final"
+    )
+
+
 def test_get_documents_by_company_handles_exception(client, monkeypatch):
     with client.application.app_context():
         company = Company(company_name="Test Co", ticker="TST")
@@ -108,7 +126,7 @@ def test_list_cvm_documents_filters(client):
     assert data["success"] is True
     assert len(data["documents"]) == 1
 
-    assert data["documents"][0]["company_name"] == "Test Co"
+    assert data["documents"][0]["company_name"] == "CompA"
     assert "company" not in data["documents"][0]
 
     assert data["documents"][0]["document_type"] == "DFP"
