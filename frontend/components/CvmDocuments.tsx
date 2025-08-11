@@ -28,12 +28,19 @@ const FilterDropdown: React.FC<{ label: string; options: Option[]; value: string
     </div>
 );
 
-const parseDateRange = (range: string): [string | undefined, string | undefined] => {
+const parseDateRange = (
+    range: string,
+): [string | undefined, string | undefined] => {
     if (!range) return [undefined, undefined];
-    const parts = range.split(/\s*[–-]\s*/);
+
+    // Allow either an en dash (–) or a regular hyphen (-) as the separator
+    // and trim any surrounding whitespace from the resulting dates.
+    const parts = range.split(/\s*(?:–|-)\s*/);
     if (parts.length !== 2) return [undefined, undefined];
-    const start = parts[0].trim().replace(/\//g, '-');
-    const end = parts[1].trim().replace(/\//g, '-');
+
+    const [startRaw, endRaw] = parts;
+    const start = startRaw.trim().replace(/\//g, '-');
+    const end = endRaw.trim().replace(/\//g, '-');
     return [start, end];
 };
 
