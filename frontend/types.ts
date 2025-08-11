@@ -487,6 +487,7 @@ export interface StockGuideData {
 export interface ResearchNote {
     id: number;
     title: string;
+    summary: string;
     content: string;
     last_updated: string;
 }

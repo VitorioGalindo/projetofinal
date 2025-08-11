@@ -224,6 +224,7 @@ class ResearchNote(db.Model):
 
     id = db.Column(Integer, primary_key=True)
     title = db.Column(String(255), nullable=False)
+    summary = db.Column(Text, nullable=True)
     content = db.Column(Text, nullable=False)
     last_updated = db.Column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()

@@ -15,6 +15,7 @@ def list_notes():
             {
                 'id': n.id,
                 'title': n.title,
+                'summary': n.summary,
                 'content': n.content,
                 'last_updated': n.last_updated.isoformat() if n.last_updated else None,
             }
@@ -30,11 +31,12 @@ def list_notes():
 def create_note():
     data = request.get_json(silent=True) or {}
     title = data.get('title')
-    content = data.get('content', '')
-    if not title:
-        return jsonify({'success': False, 'error': 'Campos obrigatórios não fornecidos'}), 400
+    summary = data.get('summary', '')
+    content = data.get('content')
+    if not title or content is None:
+           return jsonify({'success': False, 'error': 'Campos obrigatórios não fornecidos'}), 400
     try:
-        note = ResearchNote(title=title, content=content)
+        note = ResearchNote(title=title, summary=summary, content=content)
         db.session.add(note)
         db.session.commit()
         return (
@@ -44,6 +46,7 @@ def create_note():
                     'note': {
                         'id': note.id,
                         'title': note.title,
+                        'summary': note.summary,
                         'content': note.content,
                         'last_updated': note.last_updated.isoformat() if note.last_updated else None,
                     },
@@ -66,6 +69,8 @@ def update_note(note_id: int):
             return jsonify({'success': False, 'error': 'Nota não encontrada'}), 404
         if 'title' in data:
             note.title = data['title']
+        if 'summary' in data:
+            note.summary = data['summary']
         if 'content' in data:
             note.content = data['content']
         db.session.commit()
@@ -75,6 +80,7 @@ def update_note(note_id: int):
                 'note': {
                     'id': note.id,
                     'title': note.title,
+                    'summary': note.summary,
                     'content': note.content,
                     'last_updated': note.last_updated.isoformat() if note.last_updated else None,
                 },
