@@ -9,6 +9,8 @@ import sys
 import logging
 from dotenv import load_dotenv
 from sqlalchemy import text
+from alembic import command
+from alembic.config import Config
 from backend.services.rtd_worker_integration import integrate_rtd_worker
 
 # Carregar .env ANTES de tudo
@@ -68,6 +70,13 @@ def main():
         
         # Inicializar database
         with app.app_context():
+            try:
+                alembic_cfg = Config(os.path.join(os.path.dirname(__file__), 'alembic.ini'))
+                command.upgrade(alembic_cfg, 'head')
+                logger.info("✅ Migrações aplicadas com sucesso")
+            except Exception as e:
+                logger.error(f"❌ Falha ao aplicar migrações: {e}")
+
             # Testar conexão PostgreSQL
             try:
                 db.session.execute(text('SELECT 1'))

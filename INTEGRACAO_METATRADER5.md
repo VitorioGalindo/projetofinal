@@ -98,6 +98,8 @@ python3 run_backend_mt5.py
 # Ou usar script original (detecta MT5 automaticamente)
 python3 run_backend.py
 ```
+Ao executar `run_backend.py`, as migrações do banco de dados são aplicadas automaticamente
+para manter o schema atualizado.
 
 ### 4. **Verificar Funcionamento**
 
@@ -309,4 +311,6 @@ python3 run_backend_mt5.py
 ```bash
 python3 run_backend.py
 ```
+Esse comando também aplica automaticamente as migrações do Alembic,
+mantendo o banco na última versão.
 
