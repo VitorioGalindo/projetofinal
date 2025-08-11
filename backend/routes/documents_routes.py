@@ -59,7 +59,7 @@ def list_cvm_documents():
         documents = [
             {
                 "id": doc.id,
-                "company": company_name,
+                "company_name": company_name,
                 "document_type": doc.document_type,
                 "title": doc.title,
                 "delivery_date": doc.delivery_date.isoformat() if doc.delivery_date else None,
