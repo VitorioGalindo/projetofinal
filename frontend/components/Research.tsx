@@ -14,9 +14,11 @@ const Research: React.FC = () => {
             try {
                 const res = await fetch('/api/research/notes');
                 if (res.ok) {
-                    const data: ResearchNote[] = await res.json();
-                    setNotes(data);
-                    setActiveNoteId(data[0]?.id ?? null);
+                    const { notes } = await res.json();
+                    setNotes(notes);
+                    setActiveNoteId(notes[0]?.id ?? null);
+                } else {
+                    console.error('Failed to load notes');
                 }
             } catch (err) {
                 console.error('Failed to load notes', err);
@@ -33,9 +35,11 @@ const Research: React.FC = () => {
                 body: JSON.stringify({ title: 'Nova Anotação', content: '' })
             });
             if (res.ok) {
-                const newNote: ResearchNote = await res.json();
-                setNotes(prev => [newNote, ...prev]);
-                setActiveNoteId(newNote.id);
+                const { note } = await res.json();
+                setNotes(prev => [note, ...prev]);
+                setActiveNoteId(note.id);
+            } else {
+                console.error('Failed to create note');
             }
         } catch (err) {
             console.error('Failed to create note', err);
