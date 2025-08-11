@@ -30,8 +30,8 @@ def list_notes():
 def create_note():
     data = request.get_json(silent=True) or {}
     title = data.get('title')
-    content = data.get('content')
-    if not title or not content:
+    content = data.get('content', '')
+    if not title:
         return jsonify({'success': False, 'error': 'Campos obrigatórios não fornecidos'}), 400
     try:
         note = ResearchNote(title=title, content=content)
