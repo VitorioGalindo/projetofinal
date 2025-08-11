@@ -14,7 +14,8 @@ const Research: React.FC = () => {
             try {
                 const res = await fetch('/api/research/notes');
                 if (res.ok) {
-                    const data: ResearchNote[] = await res.json();
+                    const json = await res.json();
+                    const data: ResearchNote[] = json.notes;
                     setNotes(data);
                     setActiveNoteId(data[0]?.id ?? null);
                 }
@@ -30,10 +31,11 @@ const Research: React.FC = () => {
             const res = await fetch('/api/research/notes', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title: 'Nova Anotação', content: '' })
+                body: JSON.stringify({ title: 'Nova Anotação', summary: '', content: '' })
             });
             if (res.ok) {
-                const newNote: ResearchNote = await res.json();
+                const json = await res.json();
+                const newNote: ResearchNote = json.note;
                 setNotes(prev => [newNote, ...prev]);
                 setActiveNoteId(newNote.id);
             }
@@ -57,7 +59,7 @@ const Research: React.FC = () => {
         }
     };
 
-    const handleUpdateNote = (field: 'title' | 'content', value: string) => {
+    const handleUpdateNote = (field: 'title' | 'summary' | 'content', value: string) => {
         if (!activeNoteId) return;
         setNotes(prevNotes => {
             const updated = prevNotes.map(note =>
@@ -77,8 +79,9 @@ const Research: React.FC = () => {
         });
     };
 
-    const filteredNotes = notes.filter(note => 
-        note.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const filteredNotes = notes.filter(note =>
+        note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        note.summary.toLowerCase().includes(searchTerm.toLowerCase()) ||
         note.content.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
@@ -120,7 +123,7 @@ const Research: React.FC = () => {
                         >
                             <h3 className="font-semibold text-white truncate">{note.title}</h3>
                             <p className="text-sm text-slate-400 truncate mt-1">
-                                {note.content.split('\n')[0] || 'Nenhum conteúdo adicional'}
+                                {note.summary || note.content.split('\n')[0] || 'Nenhum conteúdo adicional'}
                             </p>
                             <p className="text-xs text-slate-500 mt-2">{formatDate(note.last_updated)}</p>
                         </div>
@@ -139,12 +142,19 @@ const Research: React.FC = () => {
                             </button>
                         </div>
                         <div className="flex-grow flex flex-col overflow-y-auto">
-                           <input 
+                           <input
                                 type="text"
                                 value={activeNote.title}
                                 onChange={(e) => handleUpdateNote('title', e.target.value)}
                                 className="w-full p-4 text-2xl font-bold bg-transparent text-white focus:outline-none placeholder-slate-500"
                                 placeholder="Título da nota"
+                           />
+                           <input
+                                type="text"
+                                value={activeNote.summary}
+                                onChange={(e) => handleUpdateNote('summary', e.target.value)}
+                                className="w-full p-4 bg-transparent text-slate-300 focus:outline-none placeholder-slate-500"
+                                placeholder="Resumo da nota"
                            />
                            <textarea
                                 value={activeNote.content}
@@ -152,9 +162,9 @@ const Research: React.FC = () => {
                                 className="w-full h-full flex-grow p-4 bg-transparent text-slate-300 focus:outline-none resize-none placeholder-slate-500"
                                 placeholder="Comece a escrever sua análise aqui..."
                            />
-                        </div>
-                    </>
-                ) : (
+                       </div>
+                   </>
+               ) : (
                     <div className="flex items-center justify-center h-full text-center text-slate-500">
                         <div>
                             <h2 className="text-xl font-semibold">Nenhuma nota selecionada</h2>
