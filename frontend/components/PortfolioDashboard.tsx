@@ -7,17 +7,18 @@ const PortfolioDashboard: React.FC = () => {
   const [portfolio, setPortfolio] = useState<PortfolioSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const data = await portfolioApi.getPortfolioSummary(1);
-        setPortfolio(data);
-      } catch (err) {
-        console.error(err);
-        setError('Erro ao carregar portfólio');
-      }
+  const loadSummary = async () => {
+    try {
+      const data = await portfolioApi.getPortfolioSummary(1);
+      setPortfolio(data);
+    } catch (err) {
+      console.error(err);
+      setError('Erro ao carregar portfólio');
     }
-    load();
+  };
+
+  useEffect(() => {
+    loadSummary();
   }, []);
 
   const holdings = portfolio?.holdings ?? [];
@@ -31,6 +32,7 @@ const PortfolioDashboard: React.FC = () => {
           quantity: h.quantity,
           targetWeight: 0,
         }))}
+        onSaved={loadSummary}
       />
 
       {error && <p className="text-red-400">{error}</p>}

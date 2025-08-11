@@ -5,6 +5,7 @@ import { upsertPositions } from '../services/portfolioApi';
 
 interface PortfolioManagerProps {
     initialAssets?: EditableAsset[];
+    onSaved?: () => void;
 }
 
 const initialMetrics: DailyMetric[] = [
@@ -15,7 +16,7 @@ const initialMetrics: DailyMetric[] = [
     { id: 'outrasDespesas', label: 'Outras Despesas', value: 0.00 },
 ];
 
-const PortfolioManager: React.FC<PortfolioManagerProps> = ({ initialAssets = [] }) => {
+const PortfolioManager: React.FC<PortfolioManagerProps> = ({ initialAssets = [], onSaved }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [assets, setAssets] = useState<EditableAsset[]>(initialAssets);
     const [metrics, setMetrics] = useState<DailyMetric[]>(initialMetrics);
@@ -63,6 +64,7 @@ const PortfolioManager: React.FC<PortfolioManagerProps> = ({ initialAssets = [] 
                 quantity: a.quantity,
                 avg_price: (a as any).price ?? 0,
             })));
+            onSaved?.();
             alert('Carteira salva com sucesso!');
         } catch (error) {
             console.error(error);
