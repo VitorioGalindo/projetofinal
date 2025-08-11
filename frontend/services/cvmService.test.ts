@@ -23,7 +23,21 @@ describe('cvmService', () => {
   });
 
   it('getDocumentTypes retorna lista de categorias', async () => {
-    const mockTypes = [{ code: 'CAT', description: 'Categoria' }];
+    const mockTypes = ['CAT'];
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ document_types: mockTypes })
+    }));
+    const types = await cvmService.getDocumentTypes();
+    expect(types).toEqual([
+      { code: 'CAT', name: 'CAT', description: 'CAT' }
+    ]);
+  });
+
+  it('getDocumentTypes lida com objetos preformatados', async () => {
+    const mockTypes = [
+      { code: 'CAT', name: 'Categoria', description: 'Categoria' }
+    ];
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ document_types: mockTypes })
