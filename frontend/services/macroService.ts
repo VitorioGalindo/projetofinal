@@ -32,3 +32,4 @@ async function getHistory(indicator: string): Promise<HistoryPoint[]> {
 
 export const macroService = { getIndicators, getHistory };
 
+
