@@ -45,6 +45,7 @@ def create_app():
         from .routes.macro_routes import macro_bp
         from .routes.news_routes import news_bp
         from .routes.research_routes import research_bp
+        from .routes.company_news_routes import company_news_bp
 
 
         app.register_blueprint(companies_bp, url_prefix='/api/companies')
@@ -62,6 +63,7 @@ def create_app():
         app.register_blueprint(macro_bp, url_prefix='/api/macro')
         app.register_blueprint(news_bp, url_prefix='/api/news')
         app.register_blueprint(research_bp, url_prefix='/api/research')
+        app.register_blueprint(company_news_bp, url_prefix='/api/company-news')
 
 
         db.create_all()
