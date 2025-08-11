@@ -89,6 +89,9 @@ def main():
             if mt5_worker.start() is False:
                 logger.critical("❌ Falha ao iniciar MetaTrader5 Worker. O backend será finalizado.")
                 raise RuntimeError("Falha ao iniciar MetaTrader5 Worker")
+            if not mt5_worker.mt5_connected:
+                logger.critical("❌ MT5 não conectou; abortando servidor.")
+                raise SystemExit(1)
             principais = ["VALE3", "PETR4", "ITUB4", "BBDC4", "ABEV3"]
             for symbol in principais:
                 mt5_worker.subscribe_ticker("startup", symbol)  # ativa tempo real
