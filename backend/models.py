@@ -198,3 +198,14 @@ class PortfolioDailyValue(db.Model):
     __table_args__ = (
         db.UniqueConstraint('portfolio_id', 'date', name='uix_portfolio_date'),
     )
+
+
+class ResearchNote(db.Model):
+    __tablename__ = 'research_notes'
+
+    id = db.Column(Integer, primary_key=True)
+    title = db.Column(String(255), nullable=False)
+    content = db.Column(Text, nullable=False)
+    last_updated = db.Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
