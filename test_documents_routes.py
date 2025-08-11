@@ -140,3 +140,19 @@ def test_list_cvm_documents_filters(client):
     data = resp.get_json()
     assert data["documents"] == []
 
+
+def test_list_cvm_documents_invalid_date(client):
+    with client.application.app_context():
+        company = Company(company_name="Bad Date Co", ticker="BDC")
+        db.session.add(company)
+        db.session.commit()
+        doc = CvmDocument(company_id=company.id, document_type="DFP")
+        db.session.add(doc)
+        db.session.commit()
+
+    resp = client.get("/api/cvm/documents?start_date=2024-13-01")
+    assert resp.status_code == 400
+    data = resp.get_json()
+    assert data["success"] is False
+    assert "YYYY-MM-DD" in data["message"]
+
