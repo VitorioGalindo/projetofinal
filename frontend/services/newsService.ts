@@ -2,7 +2,9 @@ import { CompanyNewsItem, MarketNewsArticle } from '../types';
 
 const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001/api';
 
-const getCompanyNews = async (ticker: string): Promise<CompanyNewsItem[]> => {
+export const getCompanyNews = async (
+  ticker: string
+): Promise<CompanyNewsItem[]> => {
   const res = await fetch(`${API_BASE}/news/company/${ticker}`);
   if (!res.ok) {
     throw new Error('Falha ao buscar notícias da empresa');
@@ -19,7 +21,9 @@ const getCompanyNews = async (ticker: string): Promise<CompanyNewsItem[]> => {
   }));
 };
 
-const getLatestNews = async (limit = 10): Promise<MarketNewsArticle[]> => {
+export const getLatestNews = async (
+  limit = 10
+): Promise<MarketNewsArticle[]> => {
   const res = await fetch(`${API_BASE}/news/latest?limit=${limit}`);
   if (!res.ok) {
     throw new Error('Falha ao buscar últimas notícias');
@@ -40,3 +44,4 @@ const getLatestNews = async (limit = 10): Promise<MarketNewsArticle[]> => {
 };
 
 export const newsService = { getCompanyNews, getLatestNews };
+
