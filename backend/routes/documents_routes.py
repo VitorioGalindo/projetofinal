@@ -57,6 +57,7 @@ def get_documents_by_company_id(company_id):
             query = query.filter(CvmDocument.document_type == doc_type)
 
 
+        # Apply optional delivery date filters
         if start_date and end_date:
             query = query.filter(
                 CvmDocument.delivery_date.between(start_date, end_date)
