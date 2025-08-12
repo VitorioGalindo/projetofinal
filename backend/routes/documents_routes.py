@@ -168,8 +168,10 @@ def list_cvm_documents():
                     "id": doc.id,
                     "company_name": company_name,
                     "document_type": doc.document_type,
+                    "category": doc.category,
                     "title": doc.title,
                     "delivery_date": delivery,
+                    "download_url": doc.download_url,
                 }
             )
         return jsonify({"success": True, "documents": documents})

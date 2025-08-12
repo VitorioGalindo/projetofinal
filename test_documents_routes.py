@@ -76,3 +76,29 @@ def test_get_documents_by_company_between_dates(client):
         2024, 6, 1
     )
 
+
+def test_list_cvm_documents_includes_category_and_download_url(client):
+    with client.application.app_context():
+        company = Company(company_name="ACME", ticker="ACM")
+        db.session.add(company)
+        db.session.commit()
+
+        doc = CvmDocument(
+            company_id=company.id,
+            document_type="DFP",
+            category="Financeiro",
+            title="DFP 2024",
+            delivery_date=datetime(2024, 1, 1),
+            download_url="http://example.com/dfp",
+        )
+        db.session.add(doc)
+        db.session.commit()
+
+    resp = client.get("/api/cvm/documents")
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert len(data["documents"]) == 1
+    returned = data["documents"][0]
+    assert returned["category"] == "Financeiro"
+    assert returned["download_url"] == "http://example.com/dfp"
+
