@@ -8,6 +8,7 @@ const MarketNews: React.FC = () => {
     const [newsArticles, setNewsArticles] = useState<MarketNewsArticle[]>([]);
     const [selectedArticle, setSelectedArticle] = useState<MarketNewsArticle | null>(null);
     const [portalFilter, setPortalFilter] = useState('');
+    const [order, setOrder] = useState<'asc' | 'desc'>('desc');
 
     const portals = useMemo(() => Array.from(new Set(newsArticles.map(n => n.source))), [newsArticles]);
 
@@ -30,16 +31,18 @@ const MarketNews: React.FC = () => {
     useEffect(() => {
         (async () => {
             try {
-                const data = await newsService.getLatestNews(limit);
+                const data = await newsService.getLatestNews(limit, portalFilter || undefined, order);
                 setNewsArticles(data);
-                if (!selectedArticle && data.length > 0) {
+                if (data.length > 0) {
                     await handleSelectArticle(data[0]);
+                } else {
+                    setSelectedArticle(null);
                 }
             } catch (err) {
                 console.error('Erro ao carregar notícias', err);
             }
         })();
-    }, [limit]);
+    }, [limit, portalFilter, order]);
 
     return (
         <div className="flex h-full gap-4 text-slate-300">
@@ -55,16 +58,26 @@ const MarketNews: React.FC = () => {
                             <CurrencyDollarIcon /> Cripto
                         </button>
                     </div>
-                    <select
-                        value={portalFilter}
-                        onChange={(e) => setPortalFilter(e.target.value)}
-                        className="bg-slate-800 text-slate-300 text-sm rounded-md border border-slate-700 px-2 py-1"
-                    >
-                        <option value="">Todos</option>
-                        {portals.map(portal => (
-                            <option key={portal} value={portal}>{portal.toUpperCase()}</option>
-                        ))}
-                    </select>
+                    <div className="flex items-center gap-2">
+                        <select
+                            value={portalFilter}
+                            onChange={(e) => setPortalFilter(e.target.value)}
+                            className="bg-slate-800 text-slate-300 text-sm rounded-md border border-slate-700 px-2 py-1"
+                        >
+                            <option value="">Todos</option>
+                            {portals.map(portal => (
+                                <option key={portal} value={portal}>{portal.toUpperCase()}</option>
+                            ))}
+                        </select>
+                        <select
+                            value={order}
+                            onChange={(e) => setOrder(e.target.value as 'asc' | 'desc')}
+                            className="bg-slate-800 text-slate-300 text-sm rounded-md border border-slate-700 px-2 py-1"
+                        >
+                            <option value="desc">Mais recentes</option>
+                            <option value="asc">Mais antigas</option>
+                        </select>
+                    </div>
                 </div>
                 <div className="flex-grow overflow-y-auto pr-1">
                     {newsArticles
@@ -81,7 +94,7 @@ const MarketNews: React.FC = () => {
                             <p className="text-xs text-slate-400 mt-1">{news.summary}</p>
                             <div className="flex items-center justify-between mt-1.5">
                                 <span className="text-xs text-slate-400">{news.source.toUpperCase()}</span>
-                                <span className="text-xs text-slate-500">{news.timestamp}</span>
+                                <span className="text-xs text-slate-500">{new Date(news.timestamp).toLocaleDateString()}</span>
                             </div>
                         </div>
                     ))}
@@ -104,7 +117,7 @@ const MarketNews: React.FC = () => {
                         <div className="flex justify-between items-start mb-4">
                             <div>
                                 <h1 className="text-2xl font-bold text-white">{selectedArticle.title}</h1>
-                                <p className="text-sm text-slate-400 mt-1">{selectedArticle.timestamp} • {selectedArticle.source}</p>
+                                <p className="text-sm text-slate-400 mt-1">{new Date(selectedArticle.timestamp).toLocaleDateString()} • {selectedArticle.source}</p>
                             </div>
                             <button onClick={() => setSelectedArticle(newsArticles[0] || null)} className="p-1 text-slate-400 hover:text-white rounded-full hover:bg-slate-700">
                                 <XMarkIcon className="w-5 h-5"/>
