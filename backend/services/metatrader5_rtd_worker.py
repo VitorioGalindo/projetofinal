@@ -25,10 +25,10 @@ logger = logging.getLogger(__name__)
 try:
     import MetaTrader5 as mt5
     MT5_AVAILABLE = True
-    logger.info("✅ MetaTrader5 disponível")
+    logger.info("MetaTrader5 disponível")
 except ImportError:
     MT5_AVAILABLE = False
-    logger.warning("⚠️ MetaTrader5 não disponível - conexão MT5 inativa")
+    logger.warning("MetaTrader5 não disponível - conexão MT5 inativa")
 
 class MetaTrader5RTDWorker:
     """
@@ -67,11 +67,11 @@ class MetaTrader5RTDWorker:
         self.MT5_SERVER = os.getenv("MT5_SERVER", "SERVIDOR_DEFAULT")
 
         if "MT5_LOGIN" not in os.environ:
-            logger.warning("⚠️ MT5_LOGIN ausente; usando valor padrão")
+            logger.warning("MT5_LOGIN ausente; usando valor padrão")
         if "MT5_PASSWORD" not in os.environ:
-            logger.warning("⚠️ MT5_PASSWORD ausente; usando valor padrão")
+            logger.warning("MT5_PASSWORD ausente; usando valor padrão")
         if "MT5_SERVER" not in os.environ:
-            logger.warning("⚠️ MT5_SERVER ausente; usando valor padrão")
+            logger.warning("MT5_SERVER ausente; usando valor padrão")
         
         # Configurações de timing
         self.PAUSE_INTERVAL_SECONDS = 2  # Mais rápido para tempo real
@@ -91,15 +91,15 @@ class MetaTrader5RTDWorker:
             with self.db_engine.connect() as conn:
                 conn.execute(text("SELECT 1"))
             
-            logger.info("✅ Conexão com banco PostgreSQL estabelecida")
+            logger.info("Conexão com banco PostgreSQL estabelecida")
         except Exception as e:
-            logger.error(f"❌ Erro ao conectar com PostgreSQL: {e}")
+            logger.error(f"Erro ao conectar com PostgreSQL: {e}")
             self.db_engine = None
 
     def initialize_mt5(self):
         """Inicializa conexão com MetaTrader5."""
         if not MT5_AVAILABLE:
-            logger.warning("⚠️ MetaTrader5 não disponível")
+            logger.warning("MetaTrader5 não disponível")
             raise RuntimeError("MetaTrader5 não disponível")
 
         try:
@@ -109,13 +109,13 @@ class MetaTrader5RTDWorker:
                 server=self.MT5_SERVER,
             ):
                 logger.error(
-                    f"❌ Falha ao inicializar MetaTrader5: {mt5.last_error()}"
+                    f"Falha ao inicializar MetaTrader5: {mt5.last_error()}"
                 )
                 raise RuntimeError(
                     f"Falha ao inicializar MetaTrader5: {mt5.last_error()}"
                 )
 
-            logger.info(f"✅ Login MT5 realizado com sucesso: {self.MT5_LOGIN}")
+            logger.info(f"Login MT5 realizado com sucesso: {self.MT5_LOGIN}")
 
             # Sincronizar símbolos e ativar tempo real
             self._sync_symbols_realtime()
@@ -124,7 +124,7 @@ class MetaTrader5RTDWorker:
             return True
 
         except Exception as e:
-            logger.error(f"❌ Erro ao inicializar MT5: {e}")
+            logger.error(f"Erro ao inicializar MT5: {e}")
             raise RuntimeError(f"Erro ao inicializar MT5: {e}")
 
     def _sync_symbols_realtime(self):
@@ -133,10 +133,10 @@ class MetaTrader5RTDWorker:
             symbols = mt5.symbols_get()
             if symbols:
                 self.mt5_symbols = {symbol.name for symbol in symbols}
-                logger.info(f"🔄 Sincronizando {len(self.mt5_symbols)} símbolos...")
+                logger.info(f"Sincronizando {len(self.mt5_symbols)} símbolos...")
                 
                 # Ativar tempo real para símbolos principais IMEDIATAMENTE
-                logger.info("🚀 ATIVANDO TEMPO REAL PARA SÍMBOLOS PRINCIPAIS...")
+                logger.info("Ativando tempo real para símbolos principais...")
                 for symbol in list(self.main_symbols):
                     if symbol not in self.mt5_symbols:
                         continue
@@ -160,14 +160,14 @@ class MetaTrader5RTDWorker:
                                 f"{symbol}: removido após {attempts} falhas de ativação"
                             )
                 
-                logger.info(f"✅ Tempo real ativo para: {list(self.realtime_symbols)}")
-                logger.info(f"❌ Falha na ativação: {list(self.failed_symbols)}")
+                logger.info(f"Tempo real ativo para: {list(self.realtime_symbols)}")
+                logger.info(f"Falha na ativação: {list(self.failed_symbols)}")
                 
             else:
-                logger.warning("⚠️ Nenhum símbolo encontrado no Market Watch")
+                logger.warning("Nenhum símbolo encontrado no Market Watch")
                 
         except Exception as e:
-            logger.error(f"❌ Erro ao sincronizar símbolos: {e}")
+            logger.error(f"Erro ao sincronizar símbolos: {e}")
 
     def _activate_realtime_for_symbol(self, symbol: str):
         """Ativa tempo real para um símbolo específico usando market_book_add."""
@@ -176,15 +176,15 @@ class MetaTrader5RTDWorker:
                 tick = mt5.symbol_info_tick(symbol)
                 if tick and tick.bid > 0:
                     self.realtime_symbols.add(symbol)
-                    logger.info(f"✅ {symbol}: tempo real ativo")
+                    logger.info(f"{symbol}: tempo real ativo")
                     return True
             self.failed_symbols.add(symbol)
-            logger.warning(f"❌ {symbol}: falha na ativação de tempo real")
+            logger.warning(f"{symbol}: falha na ativação de tempo real")
             return False
 
         except Exception as e:
             self.failed_symbols.add(symbol)
-            logger.error(f"❌ {symbol}: erro ao ativar tempo real: {e}")
+            logger.error(f"{symbol}: erro ao ativar tempo real: {e}")
             return False
 
     # --- Legacy compatibility methods ---
@@ -202,13 +202,13 @@ class MetaTrader5RTDWorker:
         PRIORIDADE ABSOLUTA PARA TICKS EM TEMPO REAL.
         """
         if not self.mt5_connected or not MT5_AVAILABLE:
-            logger.error(f"❌ MT5 não conectado. Não é possível obter cotação para {ticker}")
+            logger.error(f"MT5 não conectado. Não é possível obter cotação para {ticker}")
             return None
 
         try:
             # Verificar se ticker existe
             if ticker not in self.mt5_symbols:
-                logger.warning(f"⚠️ Ticker '{ticker}' não encontrado")
+                logger.warning(f"Ticker '{ticker}' não encontrado")
                 return None
             
             # PRIORIDADE 1: Se já tem tempo real ativo, usar tick
@@ -217,7 +217,7 @@ class MetaTrader5RTDWorker:
                 if tick and tick.bid > 0:
                     return self._format_realtime_quote(ticker, tick)
                 else:
-                    logger.warning(f"⚠️ {ticker}: tempo real ativo, mas tick inválido")
+                    logger.warning(f"{ticker}: tempo real ativo, mas tick inválido")
             
             # PRIORIDADE 2: Tentar ativar tempo real AGORA
             if ticker not in self.failed_symbols:
@@ -229,21 +229,21 @@ class MetaTrader5RTDWorker:
             # PRIORIDADE 3: Tentar forçar tick sem ativação
             tick = mt5.symbol_info_tick(ticker)
             if tick and tick.bid > 0:
-                logger.info(f"✅ {ticker}: Tick obtido sem ativação prévia")
+                logger.info(f"{ticker}: Tick obtido sem ativação prévia")
                 return self._format_realtime_quote(ticker, tick)
             
             # ÚLTIMO RECURSO: Dados mais recentes possíveis (M1)
-            logger.warning(f"⚠️ {ticker}: usando dados M1 como último recurso")
+            logger.warning(f"{ticker}: usando dados M1 como último recurso")
             rates = mt5.copy_rates_from_pos(ticker, mt5.TIMEFRAME_M1, 0, 1)
             if rates is not None and len(rates) > 0:
                 rate = rates[0]
                 return self._format_quote_from_rate(ticker, rate, "M1_fallback")
 
-            logger.error(f"❌ {ticker}: nenhum tick válido encontrado")
+            logger.error(f"{ticker}: nenhum tick válido encontrado")
             return None
 
         except Exception as e:
-            logger.error(f"❌ Erro ao obter cotação para {ticker}: {e}")
+            logger.error(f"Erro ao obter cotação para {ticker}: {e}")
             return None
 
     def _format_realtime_quote(self, ticker: str, tick) -> Dict:
@@ -283,7 +283,7 @@ class MetaTrader5RTDWorker:
 
     def _price_update_loop(self):
         """Loop principal para atualização de preços EM TEMPO REAL."""
-        logger.info("🔄 Iniciando loop de atualização TEMPO REAL...")
+        logger.info("Iniciando loop de atualização TEMPO REAL...")
         
         while self.running:
             try:
@@ -298,7 +298,7 @@ class MetaTrader5RTDWorker:
                 time.sleep(self.PAUSE_INTERVAL_SECONDS)  # 2 segundos para tempo real
                 
             except Exception as e:
-                logger.error(f"❌ Erro no loop de atualização: {e}")
+                logger.error(f"Erro no loop de atualização: {e}")
                 time.sleep(self.RETRY_DELAY_SECONDS)
 
     def subscribe_ticker(self, room: str, ticker: str):
@@ -313,7 +313,7 @@ class MetaTrader5RTDWorker:
         if ticker_upper in self.mt5_symbols and ticker_upper not in self.realtime_symbols:
             self._activate_realtime_for_symbol(ticker_upper)
         
-        logger.info(f"📈 Ticker {ticker} subscrito para room {room}")
+        logger.info(f"Ticker {ticker} subscrito para room {room}")
 
     def unsubscribe_ticker(self, room: str, ticker: str):
         """Remove subscrição de um ticker."""
@@ -322,7 +322,7 @@ class MetaTrader5RTDWorker:
             if not self.active_subscriptions[room]:
                 del self.active_subscriptions[room]
         
-        logger.info(f"📉 Ticker {ticker} removido do room {room}")
+        logger.info(f"Ticker {ticker} removido do room {room}")
 
     def get_subscription_stats(self):
         """Retorna estatísticas das subscrições."""
@@ -345,7 +345,7 @@ class MetaTrader5RTDWorker:
                 "realtime_failed": list(self.failed_symbols)
             }
         except Exception as e:
-            logger.error(f"❌ Erro ao obter estatísticas: {e}")
+            logger.error(f"Erro ao obter estatísticas: {e}")
             return {
                 "status": "error",
                 "error": str(e),
@@ -356,28 +356,28 @@ class MetaTrader5RTDWorker:
     def start(self):
         """Inicia o worker RTD em uma thread separada."""
         if self.running:
-            logger.warning("⚠️ Worker já está rodando.")
+            logger.warning("Worker já está rodando.")
             return True
 
-        logger.info("🚀 Iniciando MetaTrader5 RTD Worker TEMPO REAL...")
+        logger.info("Iniciando MetaTrader5 RTD Worker TEMPO REAL...")
 
         try:
             self.initialize_mt5()
         except RuntimeError as e:
             logger.critical(
-                f"❌ Falha na inicialização do MT5. O worker não será iniciado: {e}"
+                f"Falha na inicialização do MT5. O worker não será iniciado: {e}"
             )
             raise  
 
         self.running = True
         self.worker_thread = threading.Thread(target=self._price_update_loop, daemon=True)
         self.worker_thread.start()
-        logger.info("✅ MetaTrader5 RTD Worker TEMPO REAL iniciado com sucesso.")
+        logger.info("MetaTrader5 RTD Worker TEMPO REAL iniciado com sucesso.")
         return True
     
     def stop(self):
         """Para o worker RTD e desliga a conexão com o MT5."""
-        logger.info("🛑 Parando MetaTrader5 RTD Worker...")
+        logger.info("Parando MetaTrader5 RTD Worker...")
         self.running = False
         if self.worker_thread and self.worker_thread.is_alive():
             self.worker_thread.join(timeout=5)
@@ -391,9 +391,9 @@ class MetaTrader5RTDWorker:
                     pass
             
             mt5.shutdown()
-            logger.info("🔌 Conexão com MetaTrader5 encerrada.")
+            logger.info("Conexão com MetaTrader5 encerrada.")
         
-        logger.info("✅ MetaTrader5 RTD Worker parado.")
+        logger.info("MetaTrader5 RTD Worker parado.")
 
 # --- Singleton Pattern para o Worker ---
 rtd_worker_instance = None
@@ -407,10 +407,10 @@ def initialize_rtd_worker(socketio_instance):
     """Cria, inicia e retorna a instância única do RTD Worker."""
     global rtd_worker_instance
     if rtd_worker_instance is None:
-        logger.info("🔧 Criando nova instância do RTD Worker TEMPO REAL.")
+        logger.info("Criando nova instância do RTD Worker TEMPO REAL.")
         rtd_worker_instance = MetaTrader5RTDWorker(socketio_instance)
         rtd_worker_instance.start()
     else:
-        logger.info("🔧 Usando instância existente do RTD Worker.")
+        logger.info("Usando instância existente do RTD Worker.")
         
     return rtd_worker_instance
