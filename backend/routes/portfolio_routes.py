@@ -175,9 +175,7 @@ def upsert_positions(portfolio_id: int):
             symbol = item.get("symbol")
             if not symbol:
                 continue
-            ticker = Ticker.query.get(symbol)
-            if not ticker:
-                ticker = Ticker.query.filter_by(symbol=symbol).first()
+            ticker = Ticker.query.filter_by(symbol=symbol).first()
             if not ticker:
                 ticker_type = item.get("type")
                 if not ticker_type:
