@@ -165,7 +165,7 @@ Resposta:
 }
 ```
 
-No dashboard, o filtro "Período de Publicação" dos Documentos CVM aceita datas no formato `YYYY-MM-DD`. Caso digite manualmente, é possível separar as datas com `-` ou `–` (por exemplo, `2024-01-01 - 2024-01-31`).
+No dashboard, o filtro "Período de Publicação" dos Documentos CVM utiliza dois campos de data no formato `YYYY-MM-DD` para definir o intervalo desejado.
 
 ## Documentação Avançada
 
