@@ -30,6 +30,7 @@ export const getLatestNews = async (
   if (portal) {
     params.append('portal', portal);
   }
+  params.append('order', order);
   const res = await fetch(`${API_BASE}/news/latest?${params.toString()}`);
   if (!res.ok) {
     throw new Error('Falha ao buscar últimas notícias');

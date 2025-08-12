@@ -40,10 +40,25 @@ export async function getPortfolioDailyValues(id: number): Promise<PortfolioDail
   const data = await res.json();
   return data.values as PortfolioDailyValue[];
 }
+
+export async function updateDailyMetrics(
+  id: number,
+  metrics: { id: string; value: number }[],
+): Promise<void> {
+  const res = await fetch(`${API_BASE}/portfolio/${id}/daily-metrics`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(metrics),
+  });
+  if (!res.ok) {
+    throw new Error('Falha ao atualizar métricas');
+  }
+}
 export const portfolioApi = {
   getPortfolioSummary,
   savePortfolioSnapshot,
   upsertPositions,
   getPortfolioDailyValues,
+  updateDailyMetrics,
 };
 

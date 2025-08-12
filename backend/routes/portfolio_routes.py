@@ -1,4 +1,5 @@
 import logging
+from datetime import date
 from flask import Blueprint, jsonify, request
 from sqlalchemy.sql import func
 
@@ -8,6 +9,7 @@ from backend.models import (
     PortfolioPosition,
     AssetMetrics,
     PortfolioDailyValue,
+    PortfolioDailyMetric,
     Ticker,
 )
 
@@ -102,23 +104,23 @@ def upsert_positions(portfolio_id: int):
         return jsonify({"success": False, "error": "Formato inválido"}), 400
 
     try:
-        # Verifica se todos os tickers existem antes de inserir/atualizar
+        # Garante que todos os tickers existam ou cria novos
         for item in data:
             symbol = item.get("symbol")
-            ticker_exists = Ticker.query.get(symbol)
-            if not ticker_exists:
-                ticker_exists = Ticker.query.filter_by(symbol=symbol).first()
-            if symbol and not ticker_exists:
-                return (
-                    jsonify(
-                        {
-                            "success": False,
-                            "error": "Ticker desconhecido",
-                            "hint": "Cadastre o ticker ou importe a lista via rota dedicada",
-                        }
-                    ),
-                    400,
-                )
+            if not symbol:
+                continue
+            ticker = Ticker.query.get(symbol)
+            if not ticker:
+                ticker = Ticker.query.filter_by(symbol=symbol).first()
+            if not ticker:
+                ticker_type = item.get("type")
+                if not ticker_type:
+                    return (
+                        jsonify({"success": False, "error": "Tipo do ticker não fornecido"}),
+                        400,
+                    )
+                ticker = Ticker(symbol=symbol, type=ticker_type, company_id=None)
+                db.session.add(ticker)
 
         portfolio = Portfolio.query.get(portfolio_id)
         if not portfolio:
@@ -197,6 +199,53 @@ def create_portfolio_snapshot(portfolio_id: int):
         logger.error(f"Erro ao salvar snapshot: {e}")
         return (
             jsonify({"success": False, "error": "Erro ao salvar snapshot"}),
+            500,
+        )
+
+
+@portfolio_bp.route("/<int:portfolio_id>/daily-metrics", methods=["POST"])
+def update_daily_metrics(portfolio_id: int):
+    """Atualiza métricas diárias do portfólio."""
+    data = request.get_json(silent=True) or []
+    if not isinstance(data, list):
+        return jsonify({"success": False, "error": "Formato inválido"}), 400
+
+    try:
+        portfolio = Portfolio.query.get(portfolio_id)
+        if not portfolio:
+            portfolio = Portfolio(id=portfolio_id, name=f"Portfolio {portfolio_id}")
+            db.session.add(portfolio)
+
+        today = date.today()
+        for item in data:
+            metric_id = item.get("id")
+            value = item.get("value")
+            if metric_id is None or value is None:
+                continue
+
+            record = PortfolioDailyMetric.query.filter_by(
+                portfolio_id=portfolio_id, metric_id=metric_id, date=today
+            ).first()
+
+            if record:
+                record.value = value
+            else:
+                db.session.add(
+                    PortfolioDailyMetric(
+                        portfolio_id=portfolio_id,
+                        metric_id=metric_id,
+                        value=value,
+                        date=today,
+                    )
+                )
+
+        db.session.commit()
+        return jsonify({"success": True}), 201
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Erro ao salvar métricas: {e}")
+        return (
+            jsonify({"success": False, "error": "Erro ao salvar métricas"}),
             500,
         )
 
