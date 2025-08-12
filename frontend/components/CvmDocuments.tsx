@@ -44,12 +44,12 @@ const validateDateRange = (range: string): string | null => {
     if (!range) return null;
     const [start, end] = parseDateRange(range);
     if (!start || !end) {
-        return 'Formato de data inválido. Use YYYY-MM-DD – YYYY-MM-DD.';
+        return 'Formato de data inválido. Use YYYY-MM-DD - YYYY-MM-DD.';
     }
     const startDate = new Date(start);
     const endDate = new Date(end);
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-        return 'Formato de data inválido. Use YYYY-MM-DD – YYYY-MM-DD.';
+        return 'Formato de data inválido. Use YYYY-MM-DD - YYYY-MM-DD.';
     }
     if (startDate > endDate) {
         return 'A data inicial não pode ser posterior à data final.';
@@ -117,7 +117,7 @@ const CvmDocuments: React.FC = () => {
         setStartDate(value);
         const formattedStart = value || '';
         const formattedEnd = endDate || '';
-        setDateRange(value && endDate ? `${formattedStart} – ${formattedEnd}` : value ? formattedStart : formattedEnd);
+        setDateRange(value && endDate ? `${formattedStart} - ${formattedEnd}` : value ? formattedStart : formattedEnd);
         setDateError(validateDateOrder(value, endDate));
     };
 
@@ -125,7 +125,7 @@ const CvmDocuments: React.FC = () => {
         setEndDate(value);
         const formattedStart = startDate || '';
         const formattedEnd = value || '';
-        setDateRange(startDate && value ? `${formattedStart} – ${formattedEnd}` : startDate ? formattedStart : formattedEnd);
+        setDateRange(startDate && value ? `${formattedStart} - ${formattedEnd}` : startDate ? formattedStart : formattedEnd);
         setDateError(validateDateOrder(startDate, value));
     };
 
@@ -184,7 +184,7 @@ const CvmDocuments: React.FC = () => {
                             type="text"
                             value={dateRange}
                             onChange={(e) => handleDateRangeChange(e.target.value)}
-                            placeholder="YYYY-MM-DD – YYYY-MM-DD"
+                            placeholder="YYYY-MM-DD - YYYY-MM-DD"
                             className="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
                         />
                         {validationError && (
