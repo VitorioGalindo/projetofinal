@@ -68,6 +68,7 @@ const CvmDocuments: React.FC = () => {
     const [selectedDocumentType, setSelectedDocumentType] = useState<string>('');
     const [startDate, setStartDate] = useState<string>('');
     const [endDate, setEndDate] = useState<string>('');
+    const [dateRange, setDateRange] = useState<string>('');
     const [documents, setDocuments] = useState<CvmDocument[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
@@ -100,20 +101,14 @@ const CvmDocuments: React.FC = () => {
     };
 
     const fetchDocs = async () => {
-        const validation = validateDateRange(dateRange);
-        if (validation) {
-            setValidationError(validation);
-            return;
-        }
-        const [start, end] = parseDateRange(dateRange);
         setLoading(true);
         setError(null);
         try {
             const docs = await cvmService.getDocuments({
                 companyId: selectedCompany ? Number(selectedCompany) : undefined,
                 documentType: selectedDocumentType || undefined,
-                startDate: start,
-                endDate: end,
+                startDate: startDate || undefined,
+                endDate: endDate || undefined,
                 limit: 50,
             });
             setDocuments(docs);
@@ -126,30 +121,6 @@ const CvmDocuments: React.FC = () => {
     };
 
     useEffect(() => {
-
-        fetchDocs();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-        const fetchDocs = async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                const docs = await cvmService.getDocuments({
-                    companyId: selectedCompany ? Number(selectedCompany) : undefined,
-                    documentType: selectedDocumentType || undefined,
-                    startDate: startDate || undefined,
-                    endDate: endDate || undefined,
-                    limit: 50,
-                });
-                setDocuments(docs);
-            } catch (e: any) {
-                setDocuments([]);
-                setError(e?.message || 'Erro ao carregar documentos');
-            } finally {
-                setLoading(false);
-            }
-        };
         const handler = setTimeout(fetchDocs, 500);
         return () => clearTimeout(handler);
     }, [selectedCompany, selectedDocumentType, startDate, endDate]);
