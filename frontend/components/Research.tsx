@@ -39,8 +39,9 @@ const Research: React.FC = () => {
                 setNotes(prev => [note, ...prev]);
                 setActiveNoteId(note.id);
             } else {
-                console.error('Erro ao criar nota', await res.text());
-                alert('Não foi possível criar a nota. Verifique o backend.');
+                const { error } = await res.json();
+                console.error('Erro ao criar nota', error);
+                alert(error);
             }
         } catch (err) {
             console.error('Failed to create note', err);
@@ -49,14 +50,20 @@ const Research: React.FC = () => {
 
     const handleDeleteNote = async (noteId: number) => {
         try {
-            await fetch(`/api/research/notes/${noteId}`, { method: 'DELETE' });
-            setNotes(prevNotes => {
-                const remaining = prevNotes.filter(note => note.id !== noteId);
-                if (activeNoteId === noteId) {
-                    setActiveNoteId(remaining[0]?.id ?? null);
-                }
-                return remaining;
-            });
+            const res = await fetch(`/api/research/notes/${noteId}`, { method: 'DELETE' });
+            if (res.ok) {
+                setNotes(prevNotes => {
+                    const remaining = prevNotes.filter(note => note.id !== noteId);
+                    if (activeNoteId === noteId) {
+                        setActiveNoteId(remaining[0]?.id ?? null);
+                    }
+                    return remaining;
+                });
+            } else {
+                const { error } = await res.json();
+                console.error('Failed to delete note', error);
+                alert(error);
+            }
         } catch (err) {
             console.error('Failed to delete note', err);
         }
@@ -76,7 +83,15 @@ const Research: React.FC = () => {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(noteToUpdate)
-                }).catch(err => console.error('Failed to update note', err));
+                })
+                    .then(async res => {
+                        if (!res.ok) {
+                            const { error } = await res.json();
+                            console.error('Failed to update note', error);
+                            alert(error);
+                        }
+                    })
+                    .catch(err => console.error('Failed to update note', err));
             }
             return updated;
         });
