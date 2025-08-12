@@ -186,6 +186,7 @@ class MarketArticle(db.Model):
     conteudo_completo = db.Column(Text)
     autor = db.Column(String(255))
     data_publicacao = db.Column(DateTime)
+    data_coleta = db.Column(DateTime)
     categoria = db.Column(String(255))
     tickers_relacionados = db.Column(JSON)
     score_impacto = db.Column(Numeric(10, 4))
