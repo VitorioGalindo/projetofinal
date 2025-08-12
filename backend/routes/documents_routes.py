@@ -73,16 +73,25 @@ def get_documents_by_company_id(company_id):
         if not docs:
             return jsonify({"success": True, "documents": [], "total": total})
 
-        doc_list = [{
-            "id": doc.id,
-            "company_name": company.company_name,
-            "ticker": company.ticker,
-            "document_type": doc.document_type,
-            "category": doc.category,
-            "title": doc.title,
-            "delivery_date": doc.delivery_date.isoformat() if doc.delivery_date else None,
-            "download_url": doc.download_url
-        } for doc in docs]
+        doc_list = []
+        for doc in docs:
+            delivery = (
+                doc.delivery_date.isoformat()
+                if hasattr(doc.delivery_date, "isoformat")
+                else doc.delivery_date
+            )
+            doc_list.append(
+                {
+                    "id": doc.id,
+                    "company_name": company.company_name,
+                    "ticker": company.ticker,
+                    "document_type": doc.document_type,
+                    "category": doc.category,
+                    "title": doc.title,
+                    "delivery_date": delivery,
+                    "download_url": doc.download_url,
+                }
+            )
 
         return jsonify({
             "success": True,
@@ -91,8 +100,8 @@ def get_documents_by_company_id(company_id):
             "documents": doc_list,
             "total": total,
         })
-    except Exception as e:
-        logger.exception("Erro em get_documents_by_company_id: %s", e)
+    except Exception:
+        logger.exception("Erro em get_documents_by_company_id")
         return jsonify({"success": False, "error": "Erro interno ao buscar documentos"}), 500
 
 
@@ -147,19 +156,25 @@ def list_cvm_documents():
         if not docs:
             return jsonify({"success": True, "documents": []})
 
-        documents = [
-            {
-                "id": doc.id,
-                "company_name": company_name,
-                "document_type": doc.document_type,
-                "title": doc.title,
-                "delivery_date": doc.delivery_date.isoformat() if doc.delivery_date else None,
-            }
-            for doc, company_name in docs
-        ]
+        documents = []
+        for doc, company_name in docs:
+            delivery = (
+                doc.delivery_date.isoformat()
+                if hasattr(doc.delivery_date, "isoformat")
+                else doc.delivery_date
+            )
+            documents.append(
+                {
+                    "id": doc.id,
+                    "company_name": company_name,
+                    "document_type": doc.document_type,
+                    "title": doc.title,
+                    "delivery_date": delivery,
+                }
+            )
         return jsonify({"success": True, "documents": documents})
-    except Exception as e:
-        logger.exception("Erro em list_cvm_documents: %s", e)
+    except Exception:
+        logger.exception("Erro em list_cvm_documents")
         return jsonify({"success": False, "error": "Erro ao listar documentos"}), 500
 
 
