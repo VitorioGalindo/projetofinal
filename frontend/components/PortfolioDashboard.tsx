@@ -71,11 +71,33 @@ const PortfolioDashboard: React.FC = () => {
           <div className="bg-slate-800/50 rounded-lg p-6 border border-slate-700 h-fit">
             <h2 className="text-xl font-semibold text-white mb-4">Resumo do Portfólio</h2>
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between"><span className="text-slate-400">Valor Total:</span><span className="font-medium text-white">R$ {portfolio.total_value.toFixed(2)}</span></div>
-              <div className="flex justify-between"><span className="text-slate-400">Custo Total:</span><span className="font-medium text-white">R$ {portfolio.total_cost.toFixed(2)}</span></div>
-              <div className={`flex justify-between ${portfolio.total_gain >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                <span>Ganho/Perda:</span>
-                <span>R$ {portfolio.total_gain.toFixed(2)} ({portfolio.total_gain_percent.toFixed(2)}%)</span>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Patrimônio Líquido:</span>
+                <span className="font-medium text-white">{formatCurrency(portfolio.patrimonio_liquido)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Valor da Cota:</span>
+                <span className="font-medium text-white">R$ {portfolio.valor_cota.toFixed(2)}</span>
+              </div>
+              <div className={`flex justify-between ${portfolio.variacao_cota_pct >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                <span>Variação da Cota:</span>
+                <span>{formatPercent(portfolio.variacao_cota_pct)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Posição Comprada:</span>
+                <span className="font-medium text-white">{formatPercent(portfolio.posicao_comprada_pct)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Posição Vendida:</span>
+                <span className="font-medium text-white">{formatPercent(portfolio.posicao_vendida_pct)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Net Long:</span>
+                <span className="font-medium text-white">{formatPercent(portfolio.net_long_pct)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Exposição Total:</span>
+                <span className="font-medium text-white">{formatPercent(portfolio.exposicao_total_pct)}</span>
               </div>
             </div>
           </div>
