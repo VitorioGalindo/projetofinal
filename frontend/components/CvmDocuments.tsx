@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { CvmDocument, CvmCompany, CvmDocumentType } from '../types';
 import { DocumentTextIcon, ChevronDownIcon, ArrowTopRightOnSquareIcon } from '../constants';
 import { cvmService } from '../services/cvmService';
@@ -100,7 +100,7 @@ const CvmDocuments: React.FC = () => {
         setValidationError(validateDateRange(value));
     };
 
-    const fetchDocs = async () => {
+    const fetchDocs = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
@@ -118,12 +118,12 @@ const CvmDocuments: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [selectedCompany, selectedDocumentType, startDate, endDate]);
 
     useEffect(() => {
         const handler = setTimeout(fetchDocs, 500);
         return () => clearTimeout(handler);
-    }, [selectedCompany, selectedDocumentType, startDate, endDate]);
+    }, [fetchDocs]);
 
 
     return (
