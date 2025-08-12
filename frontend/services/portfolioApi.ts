@@ -1,4 +1,11 @@
-import { PortfolioSummary, PortfolioDailyValue, AssetContribution, IbovHistoryPoint } from '../types';
+import {
+  PortfolioSummary,
+  PortfolioDailyValue,
+  AssetContribution,
+  IbovHistoryPoint,
+  SuggestedPortfolioAsset,
+  SectorWeight,
+} from '../types';
 
 const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001/api';
 
@@ -50,6 +57,24 @@ export async function getDailyContribution(id: number): Promise<AssetContributio
   return data.contributions as AssetContribution[];
 }
 
+export async function getSuggestedPortfolio(id: number): Promise<SuggestedPortfolioAsset[]> {
+  const res = await fetch(`${API_BASE}/portfolio/${id}/suggested`);
+  if (!res.ok) {
+    throw new Error('Falha ao buscar carteira sugerida');
+  }
+  const data = await res.json();
+  return data.assets as SuggestedPortfolioAsset[];
+}
+
+export async function getSectorWeights(id: number): Promise<SectorWeight[]> {
+  const res = await fetch(`${API_BASE}/portfolio/${id}/sector-weights`);
+  if (!res.ok) {
+    throw new Error('Falha ao buscar pesos por setor');
+  }
+  const data = await res.json();
+  return data.weights as SectorWeight[];
+}
+
 export async function getIbovHistory(): Promise<IbovHistoryPoint[]> {
   const res = await fetch(`${API_BASE}/market/ibov-history`);
   if (!res.ok) {
@@ -80,5 +105,7 @@ export const portfolioApi = {
   getDailyContribution,
   getIbovHistory,
   updateDailyMetrics,
+  getSuggestedPortfolio,
+  getSectorWeights,
 };
 

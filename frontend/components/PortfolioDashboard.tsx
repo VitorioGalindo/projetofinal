@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import PortfolioManager from './PortfolioManager';
 import PortfolioCharts from './PortfolioCharts';
-import { PortfolioSummary } from '../types';
+import SuggestedPortfolio from './SuggestedPortfolio';
+import SectorWeights from './SectorWeights';
+import { PortfolioSummary, SuggestedPortfolioAsset, SectorWeight } from '../types';
 import { portfolioApi } from '../services/portfolioApi';
 
 const PortfolioDashboard: React.FC = () => {
   const [portfolio, setPortfolio] = useState<PortfolioSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [suggested, setSuggested] = useState<SuggestedPortfolioAsset[]>([]);
+  const [sectorWeights, setSectorWeights] = useState<SectorWeight[]>([]);
 
   const loadSummary = async () => {
     try {
@@ -18,8 +22,28 @@ const PortfolioDashboard: React.FC = () => {
     }
   };
 
+  const loadSuggested = async () => {
+    try {
+      const data = await portfolioApi.getSuggestedPortfolio(1);
+      setSuggested(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const loadSectorWeights = async () => {
+    try {
+      const data = await portfolioApi.getSectorWeights(1);
+      setSectorWeights(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     loadSummary();
+    loadSuggested();
+    loadSectorWeights();
   }, []);
 
   const holdings = portfolio?.holdings ?? [];
@@ -105,6 +129,10 @@ const PortfolioDashboard: React.FC = () => {
             </div>
           </div>
           <PortfolioCharts />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <SuggestedPortfolio assets={suggested} />
+            <SectorWeights weights={sectorWeights} />
+          </div>
         </>
       )}
     </div>

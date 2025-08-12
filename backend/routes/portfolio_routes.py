@@ -11,6 +11,7 @@ from backend.models import (
     PortfolioDailyValue,
     PortfolioDailyMetric,
     Ticker,
+    Company,
 )
 
 logger = logging.getLogger(__name__)
@@ -365,5 +366,125 @@ def get_portfolio_daily_contribution(portfolio_id: int):
         logger.error(f"Erro ao calcular contribuição diária: {e}")
         return (
             jsonify({"success": False, "error": "Erro ao calcular contribuição diária"}),
+            500,
+        )
+
+
+@portfolio_bp.route("/<int:portfolio_id>/suggested", methods=["GET"])
+def get_suggested_portfolio(portfolio_id: int):
+    """Retorna a lista de ativos sugeridos para o portfólio."""
+    try:
+        summary = calculate_portfolio_summary(portfolio_id)
+        if not summary:
+            return (
+                jsonify({"success": False, "error": "Portfólio não encontrado"}),
+                404,
+            )
+
+        position_pct = {h["symbol"]: h["position_pct"] for h in summary["holdings"]}
+
+        positions = (
+            PortfolioPosition.query.filter_by(portfolio_id=portfolio_id)
+            .join(Ticker, PortfolioPosition.symbol == Ticker.symbol)
+            .join(Company, Ticker.company_id == Company.id, isouter=True)
+            .join(
+                AssetMetrics,
+                PortfolioPosition.symbol == AssetMetrics.symbol,
+                isouter=True,
+            )
+            .all()
+        )
+
+        assets = []
+        for pos in positions:
+            current_price = (
+                float(pos.metrics.last_price)
+                if pos.metrics and pos.metrics.last_price is not None
+                else 0.0
+            )
+            target_price = current_price * 1.1 if current_price else 0.0
+            upside = (
+                ((target_price - current_price) / current_price * 100)
+                if current_price
+                else 0.0
+            )
+            weight = position_pct.get(pos.symbol, 0.0)
+
+            assets.append(
+                {
+                    "ticker": pos.symbol,
+                    "company": pos.ticker.company.company_name
+                    if pos.ticker and pos.ticker.company
+                    else "",
+                    "currency": "BRL",
+                    "currentPrice": current_price,
+                    "targetPrice": target_price,
+                    "upsideDownside": upside,
+                    "mktCap": 0,
+                    "pe26": "N/A",
+                    "pe5yAvg": "N/A",
+                    "deltaPe": "N/A",
+                    "evEbitda26": "N/A",
+                    "evEbitda5yAvg": "N/A",
+                    "deltaEvEbitda": "N/A",
+                    "epsGrowth26": "N/A",
+                    "ibovWeight": 0,
+                    "portfolioWeight": weight,
+                    "owUw": weight,
+                }
+            )
+
+        return jsonify({"success": True, "assets": assets})
+    except Exception as e:
+        logger.error(f"Erro ao buscar ativos sugeridos: {e}")
+        return (
+            jsonify({"success": False, "error": "Erro ao buscar ativos sugeridos"}),
+            500,
+        )
+
+
+@portfolio_bp.route("/<int:portfolio_id>/sector-weights", methods=["GET"])
+def get_portfolio_sector_weights(portfolio_id: int):
+    """Retorna os pesos por setor do portfólio."""
+    try:
+        summary = calculate_portfolio_summary(portfolio_id)
+        if not summary:
+            return (
+                jsonify({"success": False, "error": "Portfólio não encontrado"}),
+                404,
+            )
+
+        position_pct = {h["symbol"]: h["position_pct"] for h in summary["holdings"]}
+
+        positions = (
+            PortfolioPosition.query.filter_by(portfolio_id=portfolio_id)
+            .join(
+                AssetMetrics,
+                PortfolioPosition.symbol == AssetMetrics.symbol,
+                isouter=True,
+            )
+            .all()
+        )
+
+        weights = {}
+        for pos in positions:
+            sector = pos.metrics.sector if pos.metrics and pos.metrics.sector else "Unknown"
+            weights[sector] = weights.get(sector, 0.0) + position_pct.get(pos.symbol, 0.0)
+
+        result = [
+            {
+                "sector": sector,
+                "ibovWeight": 0,
+                "portfolioWeight": pct,
+                "owUw": pct,
+            }
+            for sector, pct in weights.items()
+        ]
+
+        return jsonify({"success": True, "weights": result})
+    except Exception as e:
+        logger.error(f"Erro ao calcular pesos por setor: {e}")
+        return (
+            jsonify({"success": False, "error": "Erro ao calcular pesos por setor"}),
             500,
         )
