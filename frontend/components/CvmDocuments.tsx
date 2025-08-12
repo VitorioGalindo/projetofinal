@@ -28,38 +28,6 @@ const FilterDropdown: React.FC<{ label: string; options: Option[]; value: string
     </div>
 );
 
-const parseDateRange = (
-    range: string,
-): [string | undefined, string | undefined] => {
-    if (!range) return [undefined, undefined];
-
-    // Allow either an en dash (–) or a regular hyphen (-) as the separator
-    // and trim any surrounding whitespace from the resulting dates.
-    const parts = range.split(/\s*(?:–|-)\s*/);
-    if (parts.length !== 2) return [undefined, undefined];
-
-    const [startRaw, endRaw] = parts;
-    const start = startRaw.trim().replace(/\//g, '-');
-    const end = endRaw.trim().replace(/\//g, '-');
-    return [start, end];
-};
-
-const validateDateRange = (range: string): string | null => {
-    if (!range) return null;
-    const [start, end] = parseDateRange(range);
-    if (!start || !end) {
-        return 'Formato de data inválido. Use YYYY/MM/DD – YYYY/MM/DD.';
-    }
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-        return 'Formato de data inválido. Use YYYY/MM/DD – YYYY/MM/DD.';
-    }
-    if (startDate > endDate) {
-        return 'A data inicial não pode ser posterior à data final.';
-    }
-    return null;
-};
 
 const validateDateOrder = (start: string, end: string): string | null => {
     if (!start || !end) return null;
@@ -77,11 +45,9 @@ const CvmDocuments: React.FC = () => {
     const [selectedDocumentType, setSelectedDocumentType] = useState<string>('');
     const [startDate, setStartDate] = useState<string>('');
     const [endDate, setEndDate] = useState<string>('');
-    const [dateRange, setDateRange] = useState<string>('');
     const [documents, setDocuments] = useState<CvmDocument[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
-    const [validationError, setValidationError] = useState<string | null>(null);
     const [dateError, setDateError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -105,32 +71,13 @@ const CvmDocuments: React.FC = () => {
         loadFilters();
     }, []);
 
-    const handleDateRangeChange = (value: string) => {
-        setDateRange(value);
-        setValidationError(validateDateRange(value));
-    };
-
     const handleStartDateChange = (value: string) => {
         setStartDate(value);
-        const formattedStart = value ? value.replace(/-/g, '/') : '';
-        const formattedEnd = endDate ? endDate.replace(/-/g, '/') : '';
-        setDateRange(value && endDate
-            ? `${formattedStart} – ${formattedEnd}`
-            : value
-                ? formattedStart
-                : formattedEnd);
         setDateError(validateDateOrder(value, endDate));
     };
 
     const handleEndDateChange = (value: string) => {
         setEndDate(value);
-        const formattedStart = startDate ? startDate.replace(/-/g, '/') : '';
-        const formattedEnd = value ? value.replace(/-/g, '/') : '';
-        setDateRange(startDate && value
-            ? `${formattedStart} – ${formattedEnd}`
-            : startDate
-                ? formattedStart
-                : formattedEnd);
         setDateError(validateDateOrder(startDate, value));
     };
 
@@ -185,17 +132,7 @@ const CvmDocuments: React.FC = () => {
                     <div>
                         <label className="block text-sm font-medium text-slate-400 mb-1">Filtrar por Período de Publicação</label>
 
-                        <input
-                            type="text"
-                            value={dateRange}
-                            onChange={(e) => handleDateRangeChange(e.target.value)}
-                            placeholder="YYYY/MM/DD – YYYY/MM/DD"
-                            className="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                        />
-                        {validationError && (
-                            <p className="text-red-400 text-sm mt-1">{validationError}</p>
-                        )}
-
+        
                         <div className="flex gap-2">
                             <input
                                 type="date"
@@ -223,7 +160,7 @@ const CvmDocuments: React.FC = () => {
                 <div className="flex justify-end mt-4">
                     <button
                         onClick={fetchDocs}
-                        disabled={!!validationError || !!dateError || loading}
+                        disabled={!!dateError || loading}
                         className="bg-sky-600 text-white font-semibold px-4 py-2 rounded-md hover:bg-sky-500 disabled:bg-slate-600 disabled:cursor-not-allowed transition-colors"
                     >
                         {loading ? 'Buscando...' : 'Buscar'}
