@@ -36,6 +36,8 @@ def calculate_portfolio_summary(portfolio_id: int):
     holdings = []
     total_value = 0.0
     total_cost = 0.0
+    total_long = 0.0
+    total_short = 0.0
     for pos in positions:
         last_price = float(pos.metrics.last_price) if pos.metrics else 0.0
         daily_change_pct = (
@@ -70,6 +72,10 @@ def calculate_portfolio_summary(portfolio_id: int):
 
         total_value += position_value
         total_cost += cost
+        if position_value >= 0:
+            total_long += position_value
+        else:
+            total_short += position_value
 
     # Calcula campos dependentes do valor total
     for h in holdings:
@@ -87,6 +93,35 @@ def calculate_portfolio_summary(portfolio_id: int):
     total_gain = total_value - total_cost
     total_gain_percent = (total_gain / total_cost * 100) if total_cost else 0.0
 
+    today = date.today()
+    metrics = {
+        m.metric_id: float(m.value)
+        for m in PortfolioDailyMetric.query.filter_by(
+            portfolio_id=portfolio_id, date=today
+        ).all()
+    }
+    qtd_cotas = metrics.get("qtdCotas", 0.0)
+    cota_d1 = metrics.get("cotaD1")
+
+    patrimonio_liquido = total_value
+    valor_cota = patrimonio_liquido / qtd_cotas if qtd_cotas else 0.0
+    variacao_cota_pct = (
+        ((valor_cota / cota_d1) - 1) * 100 if cota_d1 else 0.0
+    )
+
+    posicao_comprada_pct = (
+        (total_long / patrimonio_liquido * 100) if patrimonio_liquido else 0.0
+    )
+    posicao_vendida_pct = (
+        (abs(total_short) / patrimonio_liquido * 100) if patrimonio_liquido else 0.0
+    )
+    net_long_pct = posicao_comprada_pct - posicao_vendida_pct
+    exposicao_total_pct = (
+        ((total_long + abs(total_short)) / patrimonio_liquido * 100)
+        if patrimonio_liquido
+        else 0.0
+    )
+
     summary = {
         "id": portfolio.id,
         "name": portfolio.name,
@@ -95,6 +130,13 @@ def calculate_portfolio_summary(portfolio_id: int):
         "total_gain": total_gain,
         "total_gain_percent": total_gain_percent,
         "holdings": holdings,
+        "patrimonio_liquido": patrimonio_liquido,
+        "valor_cota": valor_cota,
+        "variacao_cota_pct": variacao_cota_pct,
+        "posicao_comprada_pct": posicao_comprada_pct,
+        "posicao_vendida_pct": posicao_vendida_pct,
+        "net_long_pct": net_long_pct,
+        "exposicao_total_pct": exposicao_total_pct,
     }
     return summary
 

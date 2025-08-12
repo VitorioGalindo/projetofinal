@@ -43,6 +43,13 @@ export interface PortfolioSummary {
   total_gain: number;
   total_gain_percent: number;
   holdings: Asset[];
+  patrimonio_liquido: number;
+  valor_cota: number;
+  variacao_cota_pct: number;
+  posicao_comprada_pct: number;
+  posicao_vendida_pct: number;
+  net_long_pct: number;
+  exposicao_total_pct: number;
 }
 
 export interface PortfolioDailyValue {
