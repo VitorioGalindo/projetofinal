@@ -22,6 +22,8 @@ const PortfolioDashboard: React.FC = () => {
   }, []);
 
   const holdings = portfolio?.holdings ?? [];
+  const formatCurrency = (v: number) => `R$ ${v.toFixed(2)}`;
+  const formatPercent = (v: number) => `${v.toFixed(2)}%`;
 
   return (
     <div className="space-y-6">
@@ -55,11 +57,11 @@ const PortfolioDashboard: React.FC = () => {
                     <tr key={h.symbol} className="border-b border-slate-700 hover:bg-slate-700/30">
                       <td className="px-4 py-3 font-medium text-white whitespace-nowrap">{h.symbol}</td>
                       <td className="px-4 py-3">{h.quantity}</td>
-                      <td className="px-4 py-3">R$ {h.avg_price.toFixed(2)}</td>
-                      <td className="px-4 py-3">R$ {h.current_price.toFixed(2)}</td>
-                      <td className="px-4 py-3">R$ {h.value.toFixed(2)}</td>
-                      <td className={`px-4 py-3 ${h.gain >= 0 ? 'text-green-400' : 'text-red-400'}`}>R$ {h.gain.toFixed(2)}</td>
-                      <td className={`px-4 py-3 ${h.gain >= 0 ? 'text-green-400' : 'text-red-400'}`}>{h.gain_percent.toFixed(2)}%</td>
+                      <td className="px-4 py-3">{formatCurrency(h.avg_price)}</td>
+                      <td className="px-4 py-3">{formatCurrency(h.last_price)}</td>
+                      <td className="px-4 py-3">{formatCurrency(h.position_value)}</td>
+                      <td className={`px-4 py-3 ${h.gain >= 0 ? 'text-green-400' : 'text-red-400'}`}>{formatCurrency(h.gain)}</td>
+                      <td className={`px-4 py-3 ${h.gain >= 0 ? 'text-green-400' : 'text-red-400'}`}>{formatPercent(h.gain_percent)}</td>
                     </tr>
                   ))}
                 </tbody>

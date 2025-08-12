@@ -37,12 +37,15 @@ def calculate_portfolio_summary(portfolio_id: int):
     total_value = 0.0
     total_cost = 0.0
     for pos in positions:
-        current_price = float(pos.metrics.last_price) if pos.metrics else 0.0
+        last_price = float(pos.metrics.last_price) if pos.metrics else 0.0
+        daily_change_pct = (
+            float(pos.metrics.price_change_percent) if pos.metrics else 0.0
+        )
         quantity = float(pos.quantity)
         avg_price = float(pos.avg_price)
-        value = quantity * current_price
+        position_value = quantity * last_price
         cost = quantity * avg_price
-        gain = value - cost
+        gain = position_value - cost
         gain_percent = (gain / cost * 100) if cost else 0.0
 
         holdings.append(
@@ -50,16 +53,36 @@ def calculate_portfolio_summary(portfolio_id: int):
                 "symbol": pos.symbol,
                 "quantity": quantity,
                 "avg_price": avg_price,
-                "current_price": current_price,
-                "value": value,
+                "last_price": last_price,
+                "daily_change_pct": daily_change_pct,
+                "position_value": position_value,
+                "value": position_value,
                 "cost": cost,
                 "gain": gain,
                 "gain_percent": gain_percent,
+                "contribution": 0.0,
+                "position_pct": 0.0,
+                "target_pct": 0.0,
+                "difference": 0.0,
+                "adjustment_qty": 0.0,
             }
         )
 
-        total_value += value
+        total_value += position_value
         total_cost += cost
+
+    # Calcula campos dependentes do valor total
+    for h in holdings:
+        position_pct = (h["position_value"] / total_value * 100) if total_value else 0.0
+        h["position_pct"] = position_pct
+        target_pct = h.get("target_pct", 0.0)
+        h["difference"] = target_pct - position_pct
+        h["contribution"] = (h["daily_change_pct"] * position_pct) / 100
+        h["adjustment_qty"] = (
+            (h["difference"] / 100) * total_value / h["last_price"]
+            if h["last_price"]
+            else 0.0
+        )
 
     total_gain = total_value - total_cost
     total_gain_percent = (total_gain / total_cost * 100) if total_cost else 0.0

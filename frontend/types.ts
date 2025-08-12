@@ -19,16 +19,20 @@ export type Page =
   | 'sell-side';
 
 export interface Asset {
-  ticker: string;
-  price: number;
-  dailyChange: number;
-  contribution: number;
+  symbol: string;
   quantity: number;
-  positionValue: number;
-  positionPercent: number;
-  targetPercent: number;
+  avg_price: number;
+  last_price: number;
+  daily_change_pct: number;
+  contribution: number;
+  position_value: number;
+  position_pct: number;
+  target_pct: number;
   difference: number;
-  adjustment: number;
+  adjustment_qty: number;
+  cost: number;
+  gain: number;
+  gain_percent: number;
 }
 
 export interface PortfolioSummary {
@@ -38,7 +42,7 @@ export interface PortfolioSummary {
   total_cost: number;
   total_gain: number;
   total_gain_percent: number;
-  holdings: PortfolioHolding[];
+  holdings: Asset[];
 }
 
 export interface PortfolioDailyValue {
@@ -47,17 +51,6 @@ export interface PortfolioDailyValue {
   total_cost: number;
   total_gain: number;
   total_gain_percent: number;
-}
-
-export interface PortfolioHolding {
-  symbol: string;
-  quantity: number;
-  avg_price: number;
-  current_price: number;
-  value: number;
-  cost: number;
-  gain: number;
-  gain_percent: number;
 }
 
 export interface ChatMessage {
