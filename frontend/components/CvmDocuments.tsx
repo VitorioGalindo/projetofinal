@@ -28,39 +28,6 @@ const FilterDropdown: React.FC<{ label: string; options: Option[]; value: string
     </div>
 );
 
-const parseDateRange = (
-    range: string,
-): [string | undefined, string | undefined] => {
-    if (!range) return [undefined, undefined];
-
-    // Allow either an en dash (–) or a regular hyphen (-) as the separator
-    // and trim any surrounding whitespace from the resulting dates.
-    const parts = range.split(/\s*(?:–|-)\s*/);
-    if (parts.length !== 2) return [undefined, undefined];
-
-    const [startRaw, endRaw] = parts;
-    const start = startRaw.trim().replace(/\//g, '-');
-    const end = endRaw.trim().replace(/\//g, '-');
-    return [start, end];
-};
-
-const validateDateRange = (range: string): string | null => {
-    if (!range) return null;
-    const [start, end] = parseDateRange(range);
-    if (!start || !end) {
-        return 'Formato de data inválido. Use YYYY/MM/DD – YYYY/MM/DD.';
-    }
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-        return 'Formato de data inválido. Use YYYY/MM/DD – YYYY/MM/DD.';
-    }
-    if (startDate > endDate) {
-        return 'A data inicial não pode ser posterior à data final.';
-    }
-    return null;
-};
-
 const CvmDocuments: React.FC = () => {
     const [companies, setCompanies] = useState<Option[]>([]);
     const [documentTypes, setDocumentTypes] = useState<Option[]>([{ value: '', label: 'Todas' }]);
@@ -71,7 +38,6 @@ const CvmDocuments: React.FC = () => {
     const [documents, setDocuments] = useState<CvmDocument[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
-    const [validationError, setValidationError] = useState<string | null>(null);
 
     useEffect(() => {
         const loadFilters = async () => {
@@ -93,27 +59,15 @@ const CvmDocuments: React.FC = () => {
         };
         loadFilters();
     }, []);
-
-    const handleDateRangeChange = (value: string) => {
-        setDateRange(value);
-        setValidationError(validateDateRange(value));
-    };
-
     const fetchDocs = async () => {
-        const validation = validateDateRange(dateRange);
-        if (validation) {
-            setValidationError(validation);
-            return;
-        }
-        const [start, end] = parseDateRange(dateRange);
         setLoading(true);
         setError(null);
         try {
             const docs = await cvmService.getDocuments({
                 companyId: selectedCompany ? Number(selectedCompany) : undefined,
                 documentType: selectedDocumentType || undefined,
-                startDate: start,
-                endDate: end,
+                startDate: startDate || undefined,
+                endDate: endDate || undefined,
                 limit: 50,
             });
             setDocuments(docs);
@@ -126,30 +80,11 @@ const CvmDocuments: React.FC = () => {
     };
 
     useEffect(() => {
-
         fetchDocs();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-        const fetchDocs = async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                const docs = await cvmService.getDocuments({
-                    companyId: selectedCompany ? Number(selectedCompany) : undefined,
-                    documentType: selectedDocumentType || undefined,
-                    startDate: startDate || undefined,
-                    endDate: endDate || undefined,
-                    limit: 50,
-                });
-                setDocuments(docs);
-            } catch (e: any) {
-                setDocuments([]);
-                setError(e?.message || 'Erro ao carregar documentos');
-            } finally {
-                setLoading(false);
-            }
-        };
+    useEffect(() => {
         const handler = setTimeout(fetchDocs, 500);
         return () => clearTimeout(handler);
     }, [selectedCompany, selectedDocumentType, startDate, endDate]);
@@ -179,18 +114,6 @@ const CvmDocuments: React.FC = () => {
                     />
                     <div>
                         <label className="block text-sm font-medium text-slate-400 mb-1">Filtrar por Período de Publicação</label>
-
-                        <input
-                            type="text"
-                            value={dateRange}
-                            onChange={(e) => handleDateRangeChange(e.target.value)}
-                            placeholder="YYYY/MM/DD – YYYY/MM/DD"
-                            className="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                        />
-                        {validationError && (
-                            <p className="text-red-400 text-sm mt-1">{validationError}</p>
-                        )}
-
                         <div className="flex gap-2">
                             <input
                                 type="date"
@@ -208,13 +131,12 @@ const CvmDocuments: React.FC = () => {
                                 className="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
                             />
                         </div>
-
                     </div>
                 </div>
                 <div className="flex justify-end mt-4">
                     <button
                         onClick={fetchDocs}
-                        disabled={!!validationError || loading}
+                        disabled={loading}
                         className="bg-sky-600 text-white font-semibold px-4 py-2 rounded-md hover:bg-sky-500 disabled:bg-slate-600 disabled:cursor-not-allowed transition-colors"
                     >
                         {loading ? 'Buscando...' : 'Buscar'}
