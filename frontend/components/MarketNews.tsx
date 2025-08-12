@@ -48,7 +48,7 @@ const MarketNews: React.FC = () => {
         <div className="flex h-full gap-4 text-slate-300">
             {/* Coluna Esquerda: Feed de Notícias */}
             <div className="w-1/3 max-w-sm flex flex-col h-full bg-slate-800/50 p-3 rounded-lg border border-slate-700">
-                <div className="flex items-center justify-between mb-3 border-b border-slate-700 pb-3">
+                <div className="sticky top-0 z-10 bg-slate-800 flex items-center justify-between mb-3 border-b border-slate-700 pb-3">
                     <div className="flex items-center space-x-1">
                         <button onClick={() => setActiveTab('Últimas')} className={`px-3 py-1 text-sm font-semibold rounded-md ${activeTab === 'Últimas' ? 'bg-slate-700 text-white' : 'hover:bg-slate-700/50'}`}>Últimas</button>
                         <button onClick={() => setActiveTab('Populares')} className="flex items-center gap-1 px-3 py-1 text-sm font-semibold rounded-md hover:bg-slate-700/50">
