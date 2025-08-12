@@ -20,9 +20,17 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Upgrade schema."""
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)
+    if 'artigos_mercado' not in inspector.get_table_names():
+        return
     op.add_column('artigos_mercado', sa.Column('data_coleta', sa.DateTime(), nullable=True))
 
 
 def downgrade() -> None:
     """Downgrade schema."""
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)
+    if 'artigos_mercado' not in inspector.get_table_names():
+        return
     op.drop_column('artigos_mercado', 'data_coleta')

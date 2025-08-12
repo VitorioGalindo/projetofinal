@@ -15,8 +15,18 @@ from backend.models import db
 # access to the values within the .ini file in use.
 config = context.config
 db_url = Config.SQLALCHEMY_DATABASE_URI
-if not all([Config.DB_USER, Config.DB_PASSWORD, Config.DB_HOST, Config.DB_NAME]):
-    db_url = "sqlite:///app.db"
+
+# Ensure all required database settings are provided to avoid falling back
+# to SQLite. This makes migration configuration explicit and prevents
+# accidental use of a local file database when environment variables are
+# missing.
+required_settings = [Config.DB_USER, Config.DB_PASSWORD, Config.DB_HOST, Config.DB_NAME]
+if not all(required_settings):
+    raise RuntimeError(
+        "Missing database configuration. Set DB_USER, DB_PASSWORD, "
+        "DB_HOST and DB_NAME before running migrations."
+    )
+
 config.set_main_option("sqlalchemy.url", db_url)
 
 # Interpret the config file for Python logging.
@@ -27,6 +37,7 @@ if config.config_file_name is not None:
             os.path.dirname(__file__), "..", os.path.basename(config.config_file_name)
         )
     )
+
 
 # add your model's MetaData object here
 # for 'autogenerate' support
