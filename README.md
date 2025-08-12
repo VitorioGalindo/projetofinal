@@ -165,7 +165,7 @@ Resposta:
 }
 ```
 
-No dashboard, o filtro "Período de Publicação" dos Documentos CVM utiliza dois campos de data no formato `YYYY-MM-DD` para definir o intervalo desejado.
+No dashboard, o filtro "Período de Publicação" dos Documentos CVM utiliza dois campos `input` do tipo `date` (início e fim) no formato `YYYY-MM-DD` para definir o intervalo desejado.
 
 ## Documentação Avançada
 
