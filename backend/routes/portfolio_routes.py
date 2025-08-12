@@ -313,9 +313,15 @@ def update_daily_metrics(portfolio_id: int):
         return jsonify({"success": True}), 201
     except Exception as e:
         db.session.rollback()
-        logger.error(f"Erro ao salvar métricas: {e}")
+        logger.error("Erro ao salvar métricas", exc_info=True)
         return (
-            jsonify({"success": False, "error": "Erro ao salvar métricas"}),
+            jsonify(
+                {
+                    "success": False,
+                    "error": "Erro ao salvar métricas",
+                    "detail": str(e),
+                }
+            ),
             500,
         )
 
