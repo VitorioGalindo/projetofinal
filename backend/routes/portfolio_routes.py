@@ -102,23 +102,23 @@ def upsert_positions(portfolio_id: int):
         return jsonify({"success": False, "error": "Formato inválido"}), 400
 
     try:
-        # Verifica se todos os tickers existem antes de inserir/atualizar
+        # Garante que todos os tickers existam ou cria novos
         for item in data:
             symbol = item.get("symbol")
-            ticker_exists = Ticker.query.get(symbol)
-            if not ticker_exists:
-                ticker_exists = Ticker.query.filter_by(symbol=symbol).first()
-            if symbol and not ticker_exists:
-                return (
-                    jsonify(
-                        {
-                            "success": False,
-                            "error": "Ticker desconhecido",
-                            "hint": "Cadastre o ticker ou importe a lista via rota dedicada",
-                        }
-                    ),
-                    400,
-                )
+            if not symbol:
+                continue
+            ticker = Ticker.query.get(symbol)
+            if not ticker:
+                ticker = Ticker.query.filter_by(symbol=symbol).first()
+            if not ticker:
+                ticker_type = item.get("type")
+                if not ticker_type:
+                    return (
+                        jsonify({"success": False, "error": "Tipo do ticker não fornecido"}),
+                        400,
+                    )
+                ticker = Ticker(symbol=symbol, type=ticker_type, company_id=None)
+                db.session.add(ticker)
 
         portfolio = Portfolio.query.get(portfolio_id)
         if not portfolio:
