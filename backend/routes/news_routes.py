@@ -30,11 +30,8 @@ def get_latest_news():
     if portal:
         query = query.filter(MarketArticle.portal == portal)
 
-    order_clause = (
-        MarketArticle.data_coleta.asc()
-        if order == 'asc'
-        else MarketArticle.data_coleta.desc()
-    )
+    order_field = MarketArticle.data_coleta
+    order_clause = order_field.asc() if order == 'asc' else order_field.desc()
     articles = query.order_by(order_clause).limit(limit).all()
     return jsonify([a.to_dict() for a in articles])
 

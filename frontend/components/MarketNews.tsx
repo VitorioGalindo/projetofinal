@@ -94,7 +94,7 @@ const MarketNews: React.FC = () => {
                             <p className="text-xs text-slate-400 mt-1">{news.summary}</p>
                             <div className="flex items-center justify-between mt-1.5">
                                 <span className="text-xs text-slate-400">{news.source.toUpperCase()}</span>
-                                <span className="text-xs text-slate-500">{new Date(news.timestamp || news.collectedAt).toLocaleDateString()}</span>
+                                <span className="text-xs text-slate-500">{new Date(news.timestamp || news.collectedAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}</span>
                             </div>
                         </div>
                     ))}
@@ -117,7 +117,7 @@ const MarketNews: React.FC = () => {
                         <div className="flex justify-between items-start mb-4">
                             <div>
                                 <h1 className="text-2xl font-bold text-white">{selectedArticle.title}</h1>
-                                <p className="text-sm text-slate-400 mt-1">{new Date(selectedArticle.timestamp || selectedArticle.collectedAt).toLocaleDateString()} • {selectedArticle.source}</p>
+                                <p className="text-sm text-slate-400 mt-1">{new Date(selectedArticle.timestamp || selectedArticle.collectedAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })} • {selectedArticle.source}</p>
                             </div>
                             <button onClick={() => setSelectedArticle(newsArticles[0] || null)} className="p-1 text-slate-400 hover:text-white rounded-full hover:bg-slate-700">
                                 <XMarkIcon className="w-5 h-5"/>

@@ -6,18 +6,18 @@ from backend.models import MarketArticle
 
 @pytest.fixture
 def news_with_dates(client):
-    """Insere duas notícias com datas de coleta distintas."""
+    """Insere duas notícias com horários de coleta distintos."""
     with client.application.app_context():
         older = MarketArticle(
             titulo='Old',
             portal='PortalA',
-            data_coleta=datetime(2024, 1, 1),
+            data_coleta=datetime(2024, 1, 1, 9, 0, 0),
             tickers_relacionados=[],
         )
         newer = MarketArticle(
             titulo='New',
             portal='PortalB',
-            data_coleta=datetime(2024, 1, 2),
+            data_coleta=datetime(2024, 1, 1, 15, 30, 0),
             tickers_relacionados=[],
         )
         db.session.add_all([older, newer])
@@ -65,10 +65,7 @@ def test_get_latest_news_ordering(client, news_with_dates, order):
     resp = client.get(f'/api/news/latest?order={order}')
     assert resp.status_code == 200
     data = resp.get_json()
-    data_coletas = [
-        datetime.strptime(item['data_coleta'], '%a, %d %b %Y %H:%M:%S GMT')
-        for item in data
-    ]
+    data_coletas = [datetime.fromisoformat(item['data_coleta']) for item in data]
     expected = [older_dt, newer_dt] if order == 'asc' else [newer_dt, older_dt]
     assert data_coletas == expected
 

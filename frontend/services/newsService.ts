@@ -37,23 +37,27 @@ export const getLatestNews = async (
   }
   const json = await res.json();
   const items = (json.news || json.data || json) as any[];
-  return items.map((item: any, idx: number) => ({
-    id: Number(item.id ?? idx),
-    title: item.titulo,
-    source: item.portal,
-    collectedAt: item.data_coleta || item.timestamp,
-    timestamp: item.timestamp || item.data_coleta,
-    summary: item.resumo,
-    content:
-      item.conteudo_completo ||
-      item.conteudo ||
-      item.content ||
-      item.resumo,
-    url: item.link_url,
-    imageUrl: item.imagem_url || item.image_url,
-    tags: item.tags,
-    aiAnalysis: item.aiAnalysis,
-  }));
+  return items.map((item: any, idx: number) => {
+    const collectedAt = item.data_coleta;
+    const timestamp = collectedAt ? new Date(collectedAt).toISOString() : undefined;
+    return {
+      id: Number(item.id ?? idx),
+      title: item.titulo,
+      source: item.portal,
+      collectedAt,
+      timestamp,
+      summary: item.resumo,
+      content:
+        item.conteudo_completo ||
+        item.conteudo ||
+        item.content ||
+        item.resumo,
+      url: item.link_url,
+      imageUrl: item.imagem_url || item.image_url,
+      tags: item.tags,
+      aiAnalysis: item.aiAnalysis,
+    };
+  });
 };
 
 export const analyzeNews = async (
