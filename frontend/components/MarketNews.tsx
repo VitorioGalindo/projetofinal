@@ -45,41 +45,43 @@ const MarketNews: React.FC = () => {
     }, [limit, portalFilter, order]);
 
     return (
-        <div className="flex h-full gap-4 text-slate-300">
+        <div className="grid h-full gap-4 text-slate-300 lg:grid-cols-[1fr_2fr] xl:grid-cols-[1fr_2fr_1fr]">
             {/* Coluna Esquerda: Feed de Notícias */}
-            <div className="w-1/3 max-w-sm flex flex-col h-full bg-slate-800/50 p-3 rounded-lg border border-slate-700">
-                <div className="sticky top-0 z-10 bg-slate-800 flex items-center justify-between mb-3 border-b border-slate-700 pb-3">
-                    <div className="flex items-center space-x-1">
-                        <button onClick={() => setActiveTab('Últimas')} className={`px-3 py-1 text-sm font-semibold rounded-md ${activeTab === 'Últimas' ? 'bg-slate-700 text-white' : 'hover:bg-slate-700/50'}`}>Últimas</button>
-                        <button onClick={() => setActiveTab('Populares')} className="flex items-center gap-1 px-3 py-1 text-sm font-semibold rounded-md hover:bg-slate-700/50">
-                            <StarIcon /> Populares
-                        </button>
-                        <button onClick={() => setActiveTab('Cripto')} className="flex items-center gap-1 px-3 py-1 text-sm font-semibold rounded-md hover:bg-slate-700/50">
-                            <CurrencyDollarIcon /> Cripto
-                        </button>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <select
-                            value={portalFilter}
-                            onChange={(e) => setPortalFilter(e.target.value)}
-                            className="bg-slate-800 text-slate-300 text-sm rounded-md border border-slate-700 px-2 py-1"
-                        >
-                            <option value="">Todos</option>
-                            {portals.map(portal => (
-                                <option key={portal} value={portal}>{portal.toUpperCase()}</option>
-                            ))}
-                        </select>
-                        <select
-                            value={order}
-                            onChange={(e) => setOrder(e.target.value as 'asc' | 'desc')}
-                            className="bg-slate-800 text-slate-300 text-sm rounded-md border border-slate-700 px-2 py-1"
-                        >
-                            <option value="desc">Mais recentes</option>
-                            <option value="asc">Mais antigas</option>
-                        </select>
+            <div className="flex flex-col h-full bg-slate-800/50 rounded-lg border border-slate-700 max-w-sm min-w-0">
+                <div className="sticky top-0 z-20 bg-slate-800 p-3 border-b border-slate-700">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-1">
+                            <button onClick={() => setActiveTab('Últimas')} className={`px-3 py-1 text-sm font-semibold rounded-md ${activeTab === 'Últimas' ? 'bg-slate-700 text-white' : 'hover:bg-slate-700/50'}`}>Últimas</button>
+                            <button onClick={() => setActiveTab('Populares')} className="flex items-center gap-1 px-3 py-1 text-sm font-semibold rounded-md hover:bg-slate-700/50">
+                                <StarIcon /> Populares
+                            </button>
+                            <button onClick={() => setActiveTab('Cripto')} className="flex items-center gap-1 px-3 py-1 text-sm font-semibold rounded-md hover:bg-slate-700/50">
+                                <CurrencyDollarIcon /> Cripto
+                            </button>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <select
+                                value={portalFilter}
+                                onChange={(e) => setPortalFilter(e.target.value)}
+                                className="bg-slate-800 text-slate-300 text-sm rounded-md border border-slate-700 px-2 py-1"
+                            >
+                                <option value="">Todos</option>
+                                {portals.map(portal => (
+                                    <option key={portal} value={portal}>{portal.toUpperCase()}</option>
+                                ))}
+                            </select>
+                            <select
+                                value={order}
+                                onChange={(e) => setOrder(e.target.value as 'asc' | 'desc')}
+                                className="bg-slate-800 text-slate-300 text-sm rounded-md border border-slate-700 px-2 py-1"
+                            >
+                                <option value="desc">Mais recentes</option>
+                                <option value="asc">Mais antigas</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
-                <div className="flex-grow overflow-y-auto pr-1">
+                <div className="flex-1 overflow-y-auto p-3 pt-4 pr-1">
                     {newsArticles
                         .filter(n => !portalFilter || n.source === portalFilter)
                         .map(news => (
@@ -111,7 +113,7 @@ const MarketNews: React.FC = () => {
             </div>
 
             {/* Coluna Central: Artigo */}
-            <div className="flex-1 flex flex-col bg-slate-800/50 p-4 rounded-lg border border-slate-700 overflow-y-auto">
+            <div className="flex flex-col bg-slate-800/50 p-4 rounded-lg border border-slate-700 overflow-y-auto min-w-0">
                 {selectedArticle ? (
                     <>
                         <div className="flex justify-between items-start mb-4">
@@ -147,7 +149,7 @@ const MarketNews: React.FC = () => {
             </div>
 
             {/* Coluna Direita: Análise */}
-            <div className="w-1/3 max-w-sm flex flex-col gap-4">
+            <div className="max-w-sm flex flex-col gap-4 min-w-0 lg:col-span-2 xl:col-span-1">
                  {selectedArticle?.aiAnalysis ? (
                     <>
                     <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
