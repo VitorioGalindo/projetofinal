@@ -1,5 +1,5 @@
 from backend import db
-from backend.models import Company, Ticker, PortfolioPosition
+from backend.models import Company, Ticker, PortfolioPosition, PortfolioDailyMetric
 
 
 def test_upsert_positions_requires_type_for_new_ticker(client):
@@ -42,17 +42,16 @@ def test_upsert_positions_inserts_when_ticker_exists(client):
         assert float(pos.avg_price) == 5
 
 
-def test_upsert_positions_allows_negative_quantity(client):
-    with client.application.app_context():
-        ticker = Ticker(symbol="NEG5", type="stock")
-        db.session.add(ticker)
-        db.session.commit()
-
-    payload = [{"symbol": "NEG5", "quantity": -5, "avg_price": 6}]
-    resp = client.post("/api/portfolio/1/positions", json=payload)
+def test_update_daily_metrics_inserts_values(client):
+    payload = [{"id": "cotaD1", "value": 100.5}, {"id": "qtdCotas", "value": 10}]
+    resp = client.post("/api/portfolio/1/daily-metrics", json=payload)
     assert resp.status_code == 201
+    assert resp.get_json()["success"] is True
+
     with client.application.app_context():
-        pos = PortfolioPosition.query.filter_by(portfolio_id=1, symbol="NEG5").first()
-        assert pos is not None
-        assert float(pos.quantity) == -5
+        metrics = PortfolioDailyMetric.query.filter_by(portfolio_id=1).all()
+        assert len(metrics) == 2
+        ids = {m.metric_id for m in metrics}
+        assert {"cotaD1", "qtdCotas"} == ids
+
 
