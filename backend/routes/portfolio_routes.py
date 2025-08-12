@@ -40,9 +40,15 @@ def calculate_portfolio_summary(portfolio_id: int):
     total_long = 0.0
     total_short = 0.0
     for pos in positions:
-        last_price = float(pos.metrics.last_price) if pos.metrics else 0.0
+        last_price = (
+            float(pos.metrics.last_price)
+            if pos.metrics and pos.metrics.last_price is not None
+            else 0.0
+        )
         daily_change_pct = (
-            float(pos.metrics.price_change_percent) if pos.metrics else 0.0
+            float(pos.metrics.price_change_percent)
+            if pos.metrics and pos.metrics.price_change_percent is not None
+            else 0.0
         )
         quantity = float(pos.quantity)
         avg_price = float(pos.avg_price)
@@ -96,10 +102,10 @@ def calculate_portfolio_summary(portfolio_id: int):
 
     today = date.today()
     metrics = {
-        m.metric_id: float(m.value)
+        m.metric_id: float(m.value) if m.value is not None else 0.0
         for m in PortfolioDailyMetric.query.filter_by(
             portfolio_id=portfolio_id, date=today
-        ).all()
+        )
     }
     qtd_cotas = metrics.get("qtdCotas", 0.0)
     cota_d1 = metrics.get("cotaD1")
