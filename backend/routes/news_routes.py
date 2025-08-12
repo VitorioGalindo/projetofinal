@@ -11,7 +11,7 @@ def get_news_by_ticker(ticker):
     articles = (
         MarketArticle.query
         .filter(MarketArticle.tickers_relacionados.contains([ticker_upper]))
-        .order_by(MarketArticle.data_publicacao.desc())
+        .order_by(MarketArticle.data_coleta.desc())
         .all()
     )
     return jsonify([a.to_dict() for a in articles])
@@ -31,9 +31,9 @@ def get_latest_news():
         query = query.filter(MarketArticle.portal == portal)
 
     order_clause = (
-        MarketArticle.data_publicacao.asc()
+        MarketArticle.data_coleta.asc()
         if order == 'asc'
-        else MarketArticle.data_publicacao.desc()
+        else MarketArticle.data_coleta.desc()
     )
     articles = query.order_by(order_clause).limit(limit).all()
     return jsonify([a.to_dict() for a in articles])

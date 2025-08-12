@@ -48,12 +48,12 @@ def test_get_latest_news_ordering(client):
     with client.application.app_context():
         older = MarketArticle(
             titulo='Old',
-            data_publicacao=datetime(2024, 1, 1),
+            data_coleta=datetime(2024, 1, 1),
             tickers_relacionados=[],
         )
         newer = MarketArticle(
             titulo='New',
-            data_publicacao=datetime(2024, 1, 2),
+            data_coleta=datetime(2024, 1, 2),
             tickers_relacionados=[],
         )
         db.session.add_all([older, newer])

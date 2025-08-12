@@ -16,7 +16,7 @@ export const getCompanyNews = async (
     title: item.titulo,
     summary: item.resumo,
     source: item.portal,
-    publishedDate: item.data_publicacao,
+    publishedDate: item.data_coleta,
     url: item.link_url || item.url,
   }));
 };
@@ -41,7 +41,7 @@ export const getLatestNews = async (
     id: Number(item.id ?? idx),
     title: item.titulo,
     source: item.portal,
-    timestamp: item.data_publicacao,
+    collectedAt: item.data_coleta,
     summary: item.resumo,
     content:
       item.conteudo_completo ||

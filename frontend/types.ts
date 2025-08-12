@@ -91,7 +91,7 @@ export interface MarketNewsArticle {
     id: number;
     title: string;
     source: string;
-    timestamp: string;
+    collectedAt: string;
     summary: string;
     content: string;
     url: string;
