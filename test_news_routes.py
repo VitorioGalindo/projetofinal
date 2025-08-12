@@ -4,6 +4,26 @@ from backend import db
 from backend.models import MarketArticle
 
 
+@pytest.fixture
+def news_with_dates(client):
+    """Insere duas notícias com datas de coleta distintas."""
+    with client.application.app_context():
+        older = MarketArticle(
+            titulo='Old',
+            portal='PortalA',
+            data_coleta=datetime(2024, 1, 1),
+            tickers_relacionados=[],
+        )
+        newer = MarketArticle(
+            titulo='New',
+            portal='PortalB',
+            data_coleta=datetime(2024, 1, 2),
+            tickers_relacionados=[],
+        )
+        db.session.add_all([older, newer])
+        db.session.commit()
+        return older.data_coleta, newer.data_coleta
+
 def test_get_news_by_ticker(client):
     with client.application.app_context():
         db.session.add(MarketArticle(titulo='Match', tickers_relacionados=['PETR4']))
@@ -31,12 +51,7 @@ def test_analyze_news(client):
     assert 'summary' in data
 
 
-def test_get_latest_news_portal_filter(client):
-    with client.application.app_context():
-        db.session.add(MarketArticle(titulo='A', portal='PortalA', tickers_relacionados=[]))
-        db.session.add(MarketArticle(titulo='B', portal='PortalB', tickers_relacionados=[]))
-        db.session.commit()
-
+def test_get_latest_news_portal_filter(client, news_with_dates):
     resp = client.get('/api/news/latest?portal=PortalA')
     assert resp.status_code == 200
     data = resp.get_json()
@@ -44,30 +59,18 @@ def test_get_latest_news_portal_filter(client):
     assert data[0]['portal'] == 'PortalA'
 
 
-def test_get_latest_news_ordering(client):
-    with client.application.app_context():
-        older = MarketArticle(
-            titulo='Old',
-            data_coleta=datetime(2024, 1, 1),
-            tickers_relacionados=[],
-        )
-        newer = MarketArticle(
-            titulo='New',
-            data_coleta=datetime(2024, 1, 2),
-            tickers_relacionados=[],
-        )
-        db.session.add_all([older, newer])
-        db.session.commit()
-
-    resp = client.get('/api/news/latest?order=asc')
+@pytest.mark.parametrize("order", ["asc", "desc"])
+def test_get_latest_news_ordering(client, news_with_dates, order):
+    older_dt, newer_dt = news_with_dates
+    resp = client.get(f'/api/news/latest?order={order}')
     assert resp.status_code == 200
     data = resp.get_json()
-    assert data[0]['titulo'] == 'Old'
-
-    resp = client.get('/api/news/latest?order=desc')
-    assert resp.status_code == 200
-    data = resp.get_json()
-    assert data[0]['titulo'] == 'New'
+    data_coletas = [
+        datetime.strptime(item['data_coleta'], '%a, %d %b %Y %H:%M:%S GMT')
+        for item in data
+    ]
+    expected = [older_dt, newer_dt] if order == 'asc' else [newer_dt, older_dt]
+    assert data_coletas == expected
 
 
 def test_get_latest_news_invalid_order(client):
