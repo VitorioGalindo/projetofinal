@@ -105,10 +105,11 @@ class Ticker(db.Model):
     __tablename__ = 'tickers'
     id = db.Column(Integer, primary_key=True)
     symbol = db.Column(String(20), unique=True, nullable=False, index=True)
-    company_id = db.Column(Integer, ForeignKey('companies.id'), nullable=False, index=True)
-    
-    # ADICIONADO: A coluna 'type' que existe na sua tabela
-    type = db.Column(String(50)) 
+    # company_id agora é opcional para permitir ativos sem empresa vinculada
+    company_id = db.Column(Integer, ForeignKey('companies.id'), nullable=True, index=True)
+
+    # Mantido para diferenciar tipos de ativos (ex.: stock, etf, future)
+    type = db.Column(String(50))
     
     # REMOVIDO: A coluna 'is_active' que não existe na sua tabela
     # is_active = db.Column(Boolean, default=True)
@@ -223,6 +224,7 @@ class PortfolioPosition(db.Model):
 
     portfolio = relationship("Portfolio", back_populates="positions")
     ticker = relationship("Ticker", foreign_keys=[symbol], primaryjoin="PortfolioPosition.symbol == Ticker.symbol")
+    # Relaciona pelo símbolo para também abranger ativos sem company_id
     metrics = relationship(
         "AssetMetrics",
         foreign_keys=[symbol],
