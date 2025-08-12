@@ -7,6 +7,7 @@ from sqlalchemy import text
 from .config import Config
 import logging
 import os
+import sys
 
 
 def setup_logging():
@@ -22,13 +23,20 @@ def setup_logging():
         "%(asctime)s [%(levelname)s] %(name)s - %(message)s"
     )
 
-    file_handler = logging.FileHandler(log_file)
+    file_handler = logging.FileHandler(log_file, encoding="utf-8")
     file_handler.setLevel(log_level)
     file_handler.setFormatter(formatter)
+
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+    stream_handler = logging.StreamHandler(sys.stdout)
+    stream_handler.setLevel(log_level)
+    stream_handler.setFormatter(formatter)
 
     root_logger = logging.getLogger()
     root_logger.setLevel(log_level)
     root_logger.addHandler(file_handler)
+    root_logger.addHandler(stream_handler)
 
     # Ensure SQLAlchemy errors are also captured
     sqlalchemy_logger = logging.getLogger("sqlalchemy")
