@@ -23,9 +23,10 @@ export const getCompanyNews = async (
 
 export const getLatestNews = async (
   limit = 10,
-  portal?: string
+  portal?: string,
+  order: 'asc' | 'desc' = 'desc'
 ): Promise<MarketNewsArticle[]> => {
-  const params = new URLSearchParams({ limit: String(limit) });
+  const params = new URLSearchParams({ limit: String(limit), order });
   if (portal) {
     params.append('portal', portal);
   }
