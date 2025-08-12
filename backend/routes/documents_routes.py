@@ -115,12 +115,23 @@ def list_cvm_documents():
         end_str = request.args.get('end_date')
         limit = request.args.get('limit', 100, type=int)
 
-        query = db.session.query(CvmDocument, Company.company_name).join(
+        query = db.session.query(CvmDocument, Company.company_name).outerjoin(
             Company, CvmDocument.company_id == Company.id
         )
         if doc_type:
             query = query.filter(CvmDocument.document_type == doc_type)
         if company_id:
+            company_exists = db.session.get(Company, company_id)
+            if not company_exists:
+                return (
+                    jsonify(
+                        {
+                            "success": False,
+                            "message": f"Empresa com ID {company_id} não encontrada",
+                        }
+                    ),
+                    404,
+                )
             query = query.filter(CvmDocument.company_id == company_id)
         if start_str:
             try:
@@ -166,15 +177,15 @@ def list_cvm_documents():
             documents.append(
                 {
                     "id": doc.id,
-                    "company_name": company_name,
+                    "company_name": company_name or "",
                     "document_type": doc.document_type,
                     "title": doc.title,
                     "delivery_date": delivery,
                 }
             )
         return jsonify({"success": True, "documents": documents})
-    except Exception:
-        logger.exception("Erro em list_cvm_documents")
+    except Exception as e:
+        logger.exception(e)
         return jsonify({"success": False, "error": "Erro ao listar documentos"}), 500
 
 
