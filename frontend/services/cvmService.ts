@@ -3,16 +3,27 @@ import { CvmDocument, CvmCompany, CvmDocumentType } from '../types';
 const base = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 const API_BASE_URL = base.endsWith('/api') ? base : `${base}/api`;
 
+const buildError = async (response: Response, defaultMsg: string): Promise<never> => {
+    let detail = '';
+    try {
+        const errorData = await response.json();
+        detail = errorData?.message || errorData?.error || '';
+    } catch {
+        // ignore json parsing errors
+    }
+    throw new Error(detail ? `${defaultMsg}: ${detail}` : defaultMsg);
+};
+
 const getCompanies = async (): Promise<CvmCompany[]> => {
     const response = await fetch(`${API_BASE_URL}/cvm/companies`);
-    if (!response.ok) throw new Error('Erro ao buscar empresas');
+    if (!response.ok) return buildError(response, 'Erro ao buscar empresas');
     const data = await response.json();
     return data.companies || [];
 };
 
 const getDocumentTypes = async (): Promise<CvmDocumentType[]> => {
     const response = await fetch(`${API_BASE_URL}/cvm/document-types`);
-    if (!response.ok) throw new Error('Erro ao buscar tipos de documento');
+    if (!response.ok) return buildError(response, 'Erro ao buscar tipos de documento');
     const data = await response.json();
     return (data.document_types || []).map((d: any) =>
         typeof d === 'string'
@@ -44,7 +55,7 @@ const getDocuments = async (filters: DocumentFilter = {}): Promise<CvmDocument[]
     }
 
     const response = await fetch(url);
-    if (!response.ok) throw new Error('Erro ao buscar documentos');
+    if (!response.ok) return buildError(response, 'Erro ao buscar documentos');
     const data = await response.json();
     const docs = data.documents || [];
     return docs.map((doc: any) => ({
