@@ -101,7 +101,8 @@ export interface MarketNewsArticle {
     id: number;
     title: string;
     source: string;
-    collectedAt: string;
+    collectedAt?: string;
+    timestamp?: string | number;
     summary: string;
     content: string;
     url: string;
