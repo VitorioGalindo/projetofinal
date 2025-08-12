@@ -8,6 +8,9 @@ export default defineConfig(() => {
           '@': path.resolve(__dirname, '.'),
         }
       },
+      server: {
+        host: true,
+      },
       test: {
         globals: true,
         environment: 'jsdom',
