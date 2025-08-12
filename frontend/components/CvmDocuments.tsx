@@ -61,6 +61,15 @@ const validateDateRange = (range: string): string | null => {
     return null;
 };
 
+const validateDateOrder = (start: string, end: string): string | null => {
+    if (!start || !end) return null;
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    return startDate > endDate
+        ? 'A data inicial não pode ser posterior à data final.'
+        : null;
+};
+
 const CvmDocuments: React.FC = () => {
     const [companies, setCompanies] = useState<Option[]>([]);
     const [documentTypes, setDocumentTypes] = useState<Option[]>([{ value: '', label: 'Todas' }]);
@@ -73,6 +82,7 @@ const CvmDocuments: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [validationError, setValidationError] = useState<string | null>(null);
+    const [dateError, setDateError] = useState<string | null>(null);
 
     useEffect(() => {
         const loadFilters = async () => {
@@ -100,7 +110,22 @@ const CvmDocuments: React.FC = () => {
         setValidationError(validateDateRange(value));
     };
 
+    const handleStartDateChange = (value: string) => {
+        setStartDate(value);
+        setDateError(validateDateOrder(value, endDate));
+    };
+
+    const handleEndDateChange = (value: string) => {
+        setEndDate(value);
+        setDateError(validateDateOrder(startDate, value));
+    };
+
     const fetchDocs = async () => {
+        const error = validateDateOrder(startDate, endDate);
+        if (error) {
+            setDateError(error);
+            return;
+        }
         setLoading(true);
         setError(null);
         try {
@@ -121,9 +146,10 @@ const CvmDocuments: React.FC = () => {
     };
 
     useEffect(() => {
+        if (dateError) return;
         const handler = setTimeout(fetchDocs, 500);
         return () => clearTimeout(handler);
-    }, [selectedCompany, selectedDocumentType, startDate, endDate]);
+    }, [selectedCompany, selectedDocumentType, startDate, endDate, dateError]);
 
 
     return (
@@ -166,7 +192,7 @@ const CvmDocuments: React.FC = () => {
                             <input
                                 type="date"
                                 value={startDate}
-                                onChange={(e) => setStartDate(e.target.value)}
+                                onChange={(e) => handleStartDateChange(e.target.value)}
                                 placeholder="YYYY-MM-DD"
                                 className="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
                             />
@@ -174,18 +200,22 @@ const CvmDocuments: React.FC = () => {
                             <input
                                 type="date"
                                 value={endDate}
-                                onChange={(e) => setEndDate(e.target.value)}
+                                onChange={(e) => handleEndDateChange(e.target.value)}
                                 placeholder="YYYY-MM-DD"
                                 className="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
                             />
                         </div>
+
+                        {dateError && (
+                            <p className="text-red-400 text-sm mt-1">{dateError}</p>
+                        )}
 
                     </div>
                 </div>
                 <div className="flex justify-end mt-4">
                     <button
                         onClick={fetchDocs}
-                        disabled={!!validationError || loading}
+                        disabled={!!validationError || !!dateError || loading}
                         className="bg-sky-600 text-white font-semibold px-4 py-2 rounded-md hover:bg-sky-500 disabled:bg-slate-600 disabled:cursor-not-allowed transition-colors"
                     >
                         {loading ? 'Buscando...' : 'Buscar'}
