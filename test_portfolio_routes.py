@@ -1,5 +1,5 @@
 from backend import db
-from backend.models import Company, Ticker, PortfolioPosition
+from backend.models import Company, Ticker, PortfolioPosition, PortfolioDailyMetric
 
 
 def test_upsert_positions_requires_existing_ticker(client):
@@ -26,4 +26,17 @@ def test_upsert_positions_inserts_when_ticker_exists(client):
         assert pos is not None
         assert float(pos.quantity) == 10
         assert float(pos.avg_price) == 5
+
+
+def test_update_daily_metrics_inserts_values(client):
+    payload = [{"id": "cotaD1", "value": 100.5}, {"id": "qtdCotas", "value": 10}]
+    resp = client.post("/api/portfolio/1/daily-metrics", json=payload)
+    assert resp.status_code == 201
+    assert resp.get_json()["success"] is True
+
+    with client.application.app_context():
+        metrics = PortfolioDailyMetric.query.filter_by(portfolio_id=1).all()
+        assert len(metrics) == 2
+        ids = {m.metric_id for m in metrics}
+        assert {"cotaD1", "qtdCotas"} == ids
 

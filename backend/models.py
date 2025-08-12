@@ -212,6 +212,12 @@ class Portfolio(db.Model):
         cascade="all, delete-orphan",
     )
 
+    daily_metrics = relationship(
+        "PortfolioDailyMetric",
+        back_populates="portfolio",
+        cascade="all, delete-orphan",
+    )
+
 
 class PortfolioPosition(db.Model):
     __tablename__ = 'portfolio_positions'
@@ -250,6 +256,23 @@ class PortfolioDailyValue(db.Model):
 
     __table_args__ = (
         db.UniqueConstraint('portfolio_id', 'date', name='uix_portfolio_date'),
+    )
+
+
+class PortfolioDailyMetric(db.Model):
+    __tablename__ = 'portfolio_daily_metrics'
+
+    id = db.Column(Integer, primary_key=True)
+    portfolio_id = db.Column(Integer, ForeignKey('portfolios.id'), nullable=False, index=True)
+    metric_id = db.Column(String(100), nullable=False)
+    value = db.Column(Numeric(20, 4), nullable=False)
+    date = db.Column(Date, nullable=False, server_default=func.current_date())
+    created_at = db.Column(DateTime(timezone=True), server_default=func.now())
+
+    portfolio = relationship("Portfolio", back_populates="daily_metrics")
+
+    __table_args__ = (
+        db.UniqueConstraint('portfolio_id', 'metric_id', 'date', name='uix_portfolio_metric_date'),
     )
 
 

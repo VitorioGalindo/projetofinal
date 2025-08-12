@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { EditableAsset, DailyMetric } from '../types';
 import { ChevronUpIcon, PencilSquareIcon, TrashIcon, PlusIcon } from '../constants';
-import { upsertPositions } from '../services/portfolioApi';
+import { upsertPositions, updateDailyMetrics } from '../services/portfolioApi';
 
 interface PortfolioManagerProps {
     initialAssets?: EditableAsset[];
@@ -69,6 +69,20 @@ const PortfolioManager: React.FC<PortfolioManagerProps> = ({ initialAssets = [],
         } catch (error) {
             console.error(error);
             alert('Erro ao salvar carteira');
+        }
+    };
+
+    const handleUpdateMetrics = async () => {
+        try {
+            await updateDailyMetrics(
+                1,
+                metrics.map(m => ({ id: m.id, value: m.value })),
+            );
+            onSaved?.();
+            alert('Métricas atualizadas com sucesso!');
+        } catch (error) {
+            console.error(error);
+            alert('Erro ao atualizar métricas');
         }
     };
     
@@ -162,7 +176,7 @@ const PortfolioManager: React.FC<PortfolioManagerProps> = ({ initialAssets = [],
                                 </div>
                              </div>
                         ))}
-                         <button onClick={() => console.log('Updating metrics:', metrics)} className="w-full bg-slate-600 text-white mt-4 px-4 py-2 rounded-md text-sm font-semibold hover:bg-slate-500">
+                         <button onClick={handleUpdateMetrics} className="w-full bg-slate-600 text-white mt-4 px-4 py-2 rounded-md text-sm font-semibold hover:bg-slate-500">
                             Atualizar Métricas
                         </button>
                      </div>
