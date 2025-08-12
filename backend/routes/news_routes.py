@@ -21,15 +21,21 @@ def get_news_by_ticker(ticker):
 def get_latest_news():
     limit = request.args.get('limit', 10, type=int)
     portal = request.args.get('portal')
+    order = request.args.get('order', 'desc').lower()
+
+    if order not in ('asc', 'desc'):
+        return jsonify({'error': "Parâmetro 'order' inválido"}), 400
+
     query = MarketArticle.query
     if portal:
         query = query.filter(MarketArticle.portal == portal)
-    articles = (
-        query
-        .order_by(MarketArticle.data_publicacao.desc())
-        .limit(limit)
-        .all()
+
+    order_clause = (
+        MarketArticle.data_publicacao.asc()
+        if order == 'asc'
+        else MarketArticle.data_publicacao.desc()
     )
+    articles = query.order_by(order_clause).limit(limit).all()
     return jsonify([a.to_dict() for a in articles])
 
 

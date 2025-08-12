@@ -1,4 +1,5 @@
 import pytest
+from datetime import datetime
 from backend import db
 from backend.models import MarketArticle
 
@@ -41,3 +42,34 @@ def test_get_latest_news_portal_filter(client):
     data = resp.get_json()
     assert len(data) == 1
     assert data[0]['portal'] == 'PortalA'
+
+
+def test_get_latest_news_ordering(client):
+    with client.application.app_context():
+        older = MarketArticle(
+            titulo='Old',
+            data_publicacao=datetime(2024, 1, 1),
+            tickers_relacionados=[],
+        )
+        newer = MarketArticle(
+            titulo='New',
+            data_publicacao=datetime(2024, 1, 2),
+            tickers_relacionados=[],
+        )
+        db.session.add_all([older, newer])
+        db.session.commit()
+
+    resp = client.get('/api/news/latest?order=asc')
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert data[0]['titulo'] == 'Old'
+
+    resp = client.get('/api/news/latest?order=desc')
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert data[0]['titulo'] == 'New'
+
+
+def test_get_latest_news_invalid_order(client):
+    resp = client.get('/api/news/latest?order=foo')
+    assert resp.status_code == 400
