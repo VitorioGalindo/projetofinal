@@ -23,12 +23,14 @@ export const getCompanyNews = async (
 
 export const getLatestNews = async (
   limit = 10,
-  portal?: string
+  portal?: string,
+  order: 'asc' | 'desc' = 'desc'
 ): Promise<MarketNewsArticle[]> => {
   const params = new URLSearchParams({ limit: String(limit) });
   if (portal) {
     params.append('portal', portal);
   }
+  params.append('order', order);
   const res = await fetch(`${API_BASE}/news/latest?${params.toString()}`);
   if (!res.ok) {
     throw new Error('Falha ao buscar últimas notícias');

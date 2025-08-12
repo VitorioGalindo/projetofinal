@@ -30,7 +30,7 @@ const MarketNews: React.FC = () => {
     useEffect(() => {
         (async () => {
             try {
-                const data = await newsService.getLatestNews(limit);
+                const data = await newsService.getLatestNews(limit, undefined, 'desc');
                 setNewsArticles(data);
                 if (!selectedArticle && data.length > 0) {
                     await handleSelectArticle(data[0]);
