@@ -1,4 +1,4 @@
-import { PortfolioSummary, PortfolioDailyValue } from '../types';
+import { PortfolioSummary, PortfolioDailyValue, AssetContribution, IbovHistoryPoint } from '../types';
 
 const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001/api';
 
@@ -41,6 +41,24 @@ export async function getPortfolioDailyValues(id: number): Promise<PortfolioDail
   return data.values as PortfolioDailyValue[];
 }
 
+export async function getDailyContribution(id: number): Promise<AssetContribution[]> {
+  const res = await fetch(`${API_BASE}/portfolio/${id}/daily-contribution`);
+  if (!res.ok) {
+    throw new Error('Falha ao buscar contribuição diária');
+  }
+  const data = await res.json();
+  return data.contributions as AssetContribution[];
+}
+
+export async function getIbovHistory(): Promise<IbovHistoryPoint[]> {
+  const res = await fetch(`${API_BASE}/market/ibov-history`);
+  if (!res.ok) {
+    throw new Error('Falha ao buscar histórico do Ibovespa');
+  }
+  const data = await res.json();
+  return data.history as IbovHistoryPoint[];
+}
+
 export async function updateDailyMetrics(
   id: number,
   metrics: { id: string; value: number }[],
@@ -59,6 +77,8 @@ export const portfolioApi = {
   savePortfolioSnapshot,
   upsertPositions,
   getPortfolioDailyValues,
+  getDailyContribution,
+  getIbovHistory,
   updateDailyMetrics,
 };
 
