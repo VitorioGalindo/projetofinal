@@ -110,6 +110,30 @@ const CvmDocuments: React.FC = () => {
         setValidationError(validateDateRange(value));
     };
 
+    const handleStartDateChange = (value: string) => {
+        setStartDate(value);
+        const formattedStart = value ? value.replace(/-/g, '/') : '';
+        const formattedEnd = endDate ? endDate.replace(/-/g, '/') : '';
+        setDateRange(value && endDate
+            ? `${formattedStart} – ${formattedEnd}`
+            : value
+                ? formattedStart
+                : formattedEnd);
+        setDateError(validateDateOrder(value, endDate));
+    };
+
+    const handleEndDateChange = (value: string) => {
+        setEndDate(value);
+        const formattedStart = startDate ? startDate.replace(/-/g, '/') : '';
+        const formattedEnd = value ? value.replace(/-/g, '/') : '';
+        setDateRange(startDate && value
+            ? `${formattedStart} – ${formattedEnd}`
+            : startDate
+                ? formattedStart
+                : formattedEnd);
+        setDateError(validateDateOrder(startDate, value));
+    };
+
     const fetchDocs = useCallback(async () => {
         setLoading(true);
         setError(null);
