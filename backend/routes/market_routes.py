@@ -3,6 +3,8 @@ from backend.services.metatrader5_rtd_worker import get_rtd_worker
 from backend.models import AssetMetrics
 from backend import db
 import logging
+from datetime import datetime, timedelta
+import yfinance as yf
 
 logger = logging.getLogger(__name__)
 market_bp = Blueprint('market_bp', __name__)
@@ -66,3 +68,20 @@ def get_quote(ticker):
         return jsonify({"success": True, "ticker": ticker_upper, "quote": quote})
     else:
         return jsonify({"success": False, "error": f"Não foi possível obter a cotação para '{ticker_upper}'."}), 404
+
+
+@market_bp.route('/ibov-history', methods=['GET'])
+def get_ibov_history():
+    """Retorna a série histórica do Ibovespa."""
+    try:
+        end = datetime.today().date()
+        start = end - timedelta(days=365)
+        data = yf.download('^BVSP', start=start, end=end, progress=False)[['Adj Close']]
+        history = [
+            {"date": idx.strftime('%Y-%m-%d'), "close": float(row['Adj Close'])}
+            for idx, row in data.iterrows()
+        ]
+        return jsonify({"success": True, "history": history})
+    except Exception as e:
+        logger.error(f"Erro ao obter histórico do Ibovespa: {e}")
+        return jsonify({"success": False, "error": "Erro ao obter histórico do Ibovespa"}), 500

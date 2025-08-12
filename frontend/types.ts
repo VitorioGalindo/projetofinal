@@ -60,6 +60,16 @@ export interface PortfolioDailyValue {
   total_gain_percent: number;
 }
 
+export interface AssetContribution {
+  symbol: string;
+  contribution: number;
+}
+
+export interface IbovHistoryPoint {
+  date: string;
+  close: number;
+}
+
 export interface ChatMessage {
   role: 'user' | 'model';
   content: string;

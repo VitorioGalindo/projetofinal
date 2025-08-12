@@ -1,5 +1,5 @@
 from backend import db
-from backend.models import Company, Ticker, PortfolioPosition, PortfolioDailyMetric
+from backend.models import Company, Ticker, PortfolioPosition, PortfolioDailyMetric, AssetMetrics, Portfolio
 
 
 def test_upsert_positions_requires_type_for_new_ticker(client):
@@ -53,5 +53,24 @@ def test_update_daily_metrics_inserts_values(client):
         assert len(metrics) == 2
         ids = {m.metric_id for m in metrics}
         assert {"cotaD1", "qtdCotas"} == ids
+
+
+def test_get_daily_contribution_returns_data(client):
+    with client.application.app_context():
+        company = Company(id=1, company_name="Vale")
+        ticker = Ticker(symbol="VALE3", company_id=1, type="stock")
+        portfolio = Portfolio(id=1, name="P1")
+        pos = PortfolioPosition(portfolio_id=1, symbol="VALE3", quantity=10, avg_price=5)
+        metric = AssetMetrics(symbol="VALE3", last_price=10, price_change_percent=2)
+        db.session.add_all([company, ticker, portfolio, pos, metric])
+        db.session.commit()
+
+    resp = client.get("/api/portfolio/1/daily-contribution")
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert data["success"] is True
+    assert len(data["contributions"]) == 1
+    assert data["contributions"][0]["symbol"] == "VALE3"
+    assert data["contributions"][0]["contribution"] == 2
 
 

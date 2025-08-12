@@ -343,3 +343,27 @@ def get_portfolio_daily_values(portfolio_id: int):
             jsonify({"success": False, "error": "Erro ao buscar histórico"}),
             500,
         )
+
+
+@portfolio_bp.route("/<int:portfolio_id>/daily-contribution", methods=["GET"])
+def get_portfolio_daily_contribution(portfolio_id: int):
+    """Retorna a contribuição diária por ativo do portfólio."""
+    try:
+        summary = calculate_portfolio_summary(portfolio_id)
+        if not summary:
+            return (
+                jsonify({"success": False, "error": "Portfólio não encontrado"}),
+                404,
+            )
+
+        contributions = [
+            {"symbol": h["symbol"], "contribution": h["contribution"]}
+            for h in summary["holdings"]
+        ]
+        return jsonify({"success": True, "contributions": contributions})
+    except Exception as e:
+        logger.error(f"Erro ao calcular contribuição diária: {e}")
+        return (
+            jsonify({"success": False, "error": "Erro ao calcular contribuição diária"}),
+            500,
+        )
