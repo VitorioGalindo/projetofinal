@@ -192,7 +192,12 @@ class MarketArticle(db.Model):
     score_impacto = db.Column(Numeric(10, 4))
 
     def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        if data.get('data_coleta'):
+            data['data_coleta'] = data['data_coleta'].isoformat()
+        if data.get('data_publicacao'):
+            data['data_publicacao'] = data['data_publicacao'].isoformat()
+        return data
 
 
 class Portfolio(db.Model):
