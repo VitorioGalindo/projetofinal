@@ -41,7 +41,8 @@ export const getLatestNews = async (
     id: Number(item.id ?? idx),
     title: item.titulo,
     source: item.portal,
-    collectedAt: item.data_coleta,
+    collectedAt: item.data_coleta || item.timestamp,
+    timestamp: item.timestamp || item.data_coleta,
     summary: item.resumo,
     content:
       item.conteudo_completo ||
