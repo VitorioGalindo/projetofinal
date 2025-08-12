@@ -87,7 +87,7 @@ const CvmDocuments: React.FC = () => {
                 setCompanies([{ value: '', label: 'Todas' }, ...companyData.map(c => ({ value: String(c.id), label: `${c.ticker} - ${c.company_name}` }))]);
             } catch (e: any) {
                 setCompanies([{ value: '', label: 'Todas' }]);
-                setError(e?.message || 'Erro ao carregar empresas');
+                setError(e?.message ?? 'Erro ao carregar empresas');
             }
 
             try {
@@ -95,7 +95,7 @@ const CvmDocuments: React.FC = () => {
                 setDocumentTypes([{ value: '', label: 'Todas' }, ...docTypes.map(dt => ({ value: dt.code, label: dt.name }))]);
             } catch (e: any) {
                 setDocumentTypes([{ value: '', label: 'Todas' }]);
-                setError(e?.message || 'Erro ao carregar tipos de documento');
+                setError(e?.message ?? 'Erro ao carregar tipos de documento');
             }
         };
         loadFilters();
@@ -143,7 +143,7 @@ const CvmDocuments: React.FC = () => {
             setDocuments(docs);
         } catch (e: any) {
             setDocuments([]);
-            setError(e?.message || 'Erro ao carregar documentos');
+            setError(e?.message ?? 'Erro ao carregar documentos');
         } finally {
             setLoading(false);
         }

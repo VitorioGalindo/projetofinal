@@ -22,6 +22,14 @@ describe('cvmService', () => {
     await expect(cvmService.getCompanies()).rejects.toThrow('Erro ao buscar empresas');
   });
 
+  it('getCompanies inclui mensagem detalhada do backend', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: false,
+      json: async () => ({ message: 'Detalhe' })
+    }));
+    await expect(cvmService.getCompanies()).rejects.toThrow('Erro ao buscar empresas: Detalhe');
+  });
+
   it('getDocumentTypes retorna lista de categorias', async () => {
     const mockTypes = ['CAT'];
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
@@ -49,6 +57,14 @@ describe('cvmService', () => {
   it('getDocumentTypes lança erro quando resposta não ok', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }));
     await expect(cvmService.getDocumentTypes()).rejects.toThrow('Erro ao buscar tipos de documento');
+  });
+
+  it('getDocumentTypes inclui mensagem detalhada do backend', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: false,
+      json: async () => ({ error: 'Problema' })
+    }));
+    await expect(cvmService.getDocumentTypes()).rejects.toThrow('Erro ao buscar tipos de documento: Problema');
   });
 
   it('getDocuments usa endpoint por empresa quando companyId informado', async () => {
@@ -83,5 +99,13 @@ describe('cvmService', () => {
   it('getDocuments lança erro quando resposta não ok', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }));
     await expect(cvmService.getDocuments()).rejects.toThrow('Erro ao buscar documentos');
+  });
+
+  it('getDocuments inclui mensagem detalhada do backend', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: false,
+      json: async () => ({ message: 'Falhou' })
+    }));
+    await expect(cvmService.getDocuments()).rejects.toThrow('Erro ao buscar documentos: Falhou');
   });
 });
