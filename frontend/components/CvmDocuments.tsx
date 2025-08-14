@@ -123,7 +123,6 @@ const CvmDocuments: React.FC = () => {
                                 placeholder="YYYY-MM-DD"
                                 className="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
                             />
-                            <span className="text-slate-400 self-center">até</span>
                             <input
                                 type="date"
                                 value={endDate}
