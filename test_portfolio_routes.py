@@ -43,6 +43,11 @@ def test_upsert_positions_inserts_when_ticker_exists(client):
 
 
 def test_update_daily_metrics_inserts_values(client):
+    with client.application.app_context():
+        portfolio = Portfolio(id=1, name="P1")
+        db.session.add(portfolio)
+        db.session.commit()
+
     payload = [{"id": "cotaD1", "value": 100.5}, {"id": "qtdCotas", "value": 10}]
     resp = client.post("/api/portfolio/1/daily-metrics", json=payload)
     assert resp.status_code == 201
@@ -53,6 +58,13 @@ def test_update_daily_metrics_inserts_values(client):
         assert len(metrics) == 2
         ids = {m.metric_id for m in metrics}
         assert {"cotaD1", "qtdCotas"} == ids
+
+
+def test_update_daily_metrics_returns_404_when_portfolio_not_found(client):
+    payload = [{"id": "cotaD1", "value": 100.5}]
+    resp = client.post("/api/portfolio/99/daily-metrics", json=payload)
+    assert resp.status_code == 404
+    assert resp.get_json()["error"] == "Portfólio não encontrado"
 
 
 def test_get_daily_contribution_returns_data(client):

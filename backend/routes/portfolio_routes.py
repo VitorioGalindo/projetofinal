@@ -283,8 +283,10 @@ def update_daily_metrics(portfolio_id: int):
     try:
         portfolio = Portfolio.query.get(portfolio_id)
         if not portfolio:
-            portfolio = Portfolio(id=portfolio_id, name=f"Portfolio {portfolio_id}")
-            db.session.add(portfolio)
+            return (
+                jsonify({"success": False, "error": "Portfólio não encontrado"}),
+                404,
+            )
 
         today = date.today()
         for item in data:
